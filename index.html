@@ -44,6 +44,8 @@ body{display:flex;align-items:center;justify-content:center;font-family:-apple-s
 #cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .2s}
 #cam video.on{opacity:1}
 #cam.zoom{transition:transform .45s cubic-bezier(.2,.8,.2,1),border-radius .45s}
+#close{position:absolute;top:calc(env(safe-area-inset-top,0px) + 1.2%);right:3%;width:5.2vh;height:5.2vh;border-radius:50%;background:rgba(0,0,0,.55);border:.25vh solid rgba(255,255,255,.85);color:#fff;display:none;align-items:center;justify-content:center;font-size:3.2vh;line-height:1;font-weight:600;z-index:5;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#close.show{display:flex}
 #msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2.5vh;background:rgba(5,12,28,.94);color:#fff;font-weight:700;font-size:2.6vh;text-align:center}
 #msg .spin{width:6vh;height:6vh;border-radius:50%;border:.7vh solid rgba(255,255,255,.2);border-top-color:#fff;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -63,6 +65,7 @@ body{display:flex;align-items:center;justify-content:center;font-family:-apple-s
   <div class="hot" id="of" aria-label="Office"></div>
   <div class="hot" id="homebtn" aria-label="Home"></div>
   <div id="cam"></div>
+  <div id="close" aria-label="Close camera">&#x2715;</div>
   <div id="msg"><div class="spin"></div><div id="msgtxt">Reconnecting...</div></div>
 </div>
 <script>
@@ -119,11 +122,15 @@ body{display:flex;align-items:center;justify-content:center;font-family:-apple-s
     const first=vids[clips[0]];first.currentTime=0;first.classList.add('on');
     cam.classList.remove('zoom');cam.style.display='block';cam.style.transform=tileXf(tile);cam.style.borderRadius='6%';
     requestAnimationFrame(()=>requestAnimationFrame(()=>{cam.classList.add('zoom');cam.style.transform='none';cam.style.borderRadius='0'}));
-    setTimeout(()=>{playPart(0);busy=false},470);
+    setTimeout(()=>{playPart(0);busy=false;$('close').classList.add('show')},470);
   };
   const playPart=i=>{part=i;Object.values(vids).forEach(v=>{if(v!==vids[cur[i]]){v.pause();v.classList.remove('on')}});const v=vids[cur[i]];v.classList.add('on');v.currentTime=0;const p=v.play();if(p&&p.catch)p.catch(()=>{})};
-  const closeCam=()=>{busy=true;Object.values(vids).forEach(v=>v.pause());cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false},470)};
-  cam.addEventListener('click',()=>{if(busy||!cur)return;if(part<cur.length-1)playPart(part+1);else closeCam()});
+  const closeCam=()=>{if(cam.style.display!=='block')return;busy=true;$('close').classList.remove('show');Object.values(vids).forEach(v=>v.pause());cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false},470)};
+  $('close').addEventListener('click',e=>{e.stopPropagation();if(!busy)closeCam()});
+  let sy=null,swiped=false;
+  cam.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;swiped=false},{passive:true});
+  cam.addEventListener('touchmove',e=>{if(sy!==null&&e.touches[0].clientY-sy>70&&!swiped&&!busy){swiped=true;closeCam()}},{passive:true});
+  cam.addEventListener('click',()=>{if(swiped){swiped=false;return}if(busy||!cur)return;if(part<cur.length-1)playPart(part+1);else closeCam()});
 
   const reconnecting=(tile,name)=>{flashTile(tile);$('msgtxt').textContent=name+' camera: Reconnecting...';msg.style.display='flex';setTimeout(()=>msg.style.display='none',2200)};
   Object.entries(ROOMS).forEach(([id,r])=>{const t=$(id);t.addEventListener('click',()=>r.clips.length?openCam(t,r.clips):reconnecting(t,r.name))});
