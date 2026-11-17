@@ -49,6 +49,17 @@ body{display:flex;align-items:center;justify-content:center;font-family:-apple-s
 #msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2.5vh;background:rgba(5,12,28,.94);color:#fff;font-weight:700;font-size:2.6vh;text-align:center}
 #msg .spin{width:6vh;height:6vh;border-radius:50%;border:.7vh solid rgba(255,255,255,.2);border-top-color:#fff;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+#talkbar{position:absolute;left:0;right:0;bottom:0;padding:6vh 0 calc(env(safe-area-inset-bottom,0px) + 3.5vh);display:none;flex-direction:column;align-items:center;gap:1.4vh;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.7));z-index:5}
+#talkbar.show{display:flex}
+#talklbl{color:#fff;font-weight:700;font-size:2vh;text-shadow:0 1px 6px #000;display:flex;align-items:center;gap:1vh;min-height:2.6vh}
+#wave{display:none;gap:.4vh;height:2.4vh;align-items:center}
+#wave.on{display:flex}
+#wave b{width:.5vh;border-radius:.3vh;background:#fff;animation:wv .7s ease-in-out infinite}
+#wave b:nth-child(2){animation-delay:.1s}#wave b:nth-child(3){animation-delay:.2s}#wave b:nth-child(4){animation-delay:.3s}#wave b:nth-child(5){animation-delay:.15s}
+@keyframes wv{0%,100%{height:.5vh}50%{height:2.4vh}}
+#talk{width:11vh;height:11vh;border-radius:50%;background:#fff;color:#111;display:grid;place-items:center;touch-action:none;transition:transform .12s,background .12s;box-shadow:0 .8vh 3vh rgba(0,0,0,.55)}
+#talk svg{width:4.6vh;height:4.6vh}
+#talk.down{background:#2f7dff;color:#fff;transform:scale(1.12);box-shadow:0 0 0 1.3vh rgba(47,125,255,.35),0 0 0 2.8vh rgba(47,125,255,.15)}
 #hint{position:absolute;left:0;right:0;bottom:1.2%;text-align:center;color:rgba(255,255,255,.0);font-size:1.4vh;pointer-events:none}
 @media (prefers-reduced-motion:reduce){#cam.zoom{transition:none}}
 </style>
@@ -66,13 +77,25 @@ body{display:flex;align-items:center;justify-content:center;font-family:-apple-s
   <div class="hot" id="homebtn" aria-label="Home"></div>
   <div id="cam"></div>
   <div id="close" aria-label="Close camera">&#x2715;</div>
+  <div id="talkbar">
+    <div id="talklbl"><span id="wave"><b></b><b></b><b></b><b></b><b></b></span><span id="talktxt">Hold to talk</span></div>
+    <div id="talk" aria-label="Hold to talk"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg></div>
+  </div>
   <div id="msg"><div class="spin"></div><div id="msgtxt">Reconnecting...</div></div>
 </div>
 <script>
 {
-  /* ===== ROOMS: add clip files here as they're made (played in order, tap to advance) ===== */
+  /* ===== ROOMS: add clip files here as they're made (played in order) =====
+     A clip can be 'file.mp4' or {v:'file.mp4', idle:'loop.mp4'}: the idle loop plays after the clip
+     while Christopher talks. Rooms with talk:true advance with the Talk button (hold, speak, let go);
+     other rooms advance with a tap. */
   const ROOMS={
-    fd:{name:'Front Door', clips:['fd1.mp4','fd2.mp4','fd3.mp4']},
+    fd:{name:'Front Door', talk:true, clips:[
+      {v:'fd1.mp4',idle:'fd1_idle.mp4'},  // hop up, squish, fog, "Knock knock!"   -> "Who's there?"
+      {v:'fd2.mp4',idle:'fd2_idle.mp4'},  // "Elf!"                                 -> "Elf who?"
+      {v:'fd3.mp4',idle:'fd3_idle.mp4'},  // "Elf me in, it's freezing out here!"   -> "NOPE! No elves allowed!"
+      {v:'fd4.mp4'}                       // nyah-nyah, then freezes like a doll
+    ]},
     ki:{name:'Kitchen',    clips:[]},
     lr:{name:'Living Room',clips:[]},
     of:{name:'Office',     clips:[]}
@@ -86,7 +109,9 @@ body{display:flex;align-items:center;justify-content:center;font-family:-apple-s
 
   /* preload every clip so nothing buffers mid-show */
   const vids={};
-  const allClips=[...Object.values(ROOMS).flatMap(r=>r.clips),...FINALE.clips];
+  const norm=c=>typeof c==='string'?{v:c}:c;
+  Object.values(ROOMS).forEach(r=>r.clips=r.clips.map(norm));FINALE.clips=FINALE.clips.map(norm);
+  const allClips=[...Object.values(ROOMS).flatMap(r=>r.clips),...FINALE.clips].flatMap(c=>c.idle?[c.v,c.idle]:[c.v]);
   allClips.forEach(src=>{const v=document.createElement('video');v.playsInline=true;v.setAttribute('playsinline','');v.preload='auto';cam.appendChild(v);vids[src]=v;fetch(src).then(r=>r.blob()).then(b=>{v.src=URL.createObjectURL(b);v.load()}).catch(()=>{v.src=src;v.load()})});
   if('serviceWorker' in navigator&&location.protocol==='https:'){const hadCtl=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{try{r.update()}catch(e){}}).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadCtl&&!window.__rl){window.__rl=1;location.reload()}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})})}
 
@@ -115,25 +140,44 @@ body{display:flex;align-items:center;justify-content:center;font-family:-apple-s
   /* ---- open a camera: zoom out of its tile, play clip 1; tap = next clip; tap after last = back home ---- */
   const flashTile=el=>{el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')};
   const tileXf=el=>{const sr=stage.getBoundingClientRect(),tr=el.getBoundingClientRect();return `translate(${tr.left-sr.left}px,${tr.top-sr.top}px) scale(${tr.width/sr.width},${tr.height/sr.height})`};
-  const openCam=(tile,clips)=>{
+  let talkRoom=false;
+  /* iPhone only allows sound after a tap, so on opening a camera, quietly unlock every clip in that room */
+  const prime=clips=>clips.flatMap(c=>c.idle?[c.v,c.idle]:[c.v]).slice(1).forEach(src=>{const v=vids[src];const p=(v.muted=true,v.play());const back=()=>{v.pause();try{v.currentTime=0}catch(e){}v.muted=false};if(p&&p.then)p.then(back).catch(()=>{v.muted=false});else back()});
+  const openCam=(tile,clips,talk)=>{
     if(busy)return;busy=true;audio();wake();flashTile(tile);
-    cur=clips;curTile=tile;
-    Object.values(vids).forEach(v=>{v.pause();v.classList.remove('on')});
-    const first=vids[clips[0]];first.currentTime=0;first.classList.add('on');
+    cur=clips;curTile=tile;talkRoom=!!talk;
+    Object.values(vids).forEach(v=>{v.pause();v.onended=null;v.classList.remove('on')});
+    prime(clips);
+    const first=vids[clips[0].v];first.currentTime=0;first.classList.add('on');
     cam.classList.remove('zoom');cam.style.display='block';cam.style.transform=tileXf(tile);cam.style.borderRadius='6%';
     requestAnimationFrame(()=>requestAnimationFrame(()=>{cam.classList.add('zoom');cam.style.transform='none';cam.style.borderRadius='0'}));
-    setTimeout(()=>{playPart(0);busy=false;$('close').classList.add('show')},470);
+    setTimeout(()=>{playPart(0);busy=false;$('close').classList.add('show');$('talkbar').classList.toggle('show',talkRoom)},470);
   };
-  const playPart=i=>{part=i;Object.values(vids).forEach(v=>{if(v!==vids[cur[i]]){v.pause();v.classList.remove('on')}});const v=vids[cur[i]];v.classList.add('on');v.currentTime=0;const p=v.play();if(p&&p.catch)p.catch(()=>{})};
-  const closeCam=()=>{if(cam.style.display!=='block')return;busy=true;$('close').classList.remove('show');Object.values(vids).forEach(v=>v.pause());cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false},470)};
+  /* show a video only once it is actually playing, so there is never a black flash */
+  const playSrc=(src,loop)=>{
+    const v=vids[src];v.loop=!!loop;try{v.currentTime=0}catch(e){}
+    const swap=()=>{v.removeEventListener('playing',swap);v.classList.add('on');Object.values(vids).forEach(o=>{if(o!==v){o.classList.remove('on');o.pause()}})};
+    v.addEventListener('playing',swap);
+    const p=v.play();if(p&&p.catch)p.catch(()=>v.removeEventListener('playing',swap));
+  };
+  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part===i&&c.idle)playSrc(c.idle,true)};playSrc(c.v,false)};
+  const closeCam=()=>{if(cam.style.display!=='block')return;busy=true;$('close').classList.remove('show');$('talkbar').classList.remove('show');Object.values(vids).forEach(v=>{v.pause();v.onended=null});cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false},470)};
+
+  /* ---- Talk button: hold while speaking, let go to play the next part (quick taps are ignored) ---- */
+  const talkEl=$('talk');let tDown=false,tAt=0;
+  const tPress=e=>{e.preventDefault();e.stopPropagation();tDown=true;tAt=Date.now();talkEl.classList.add('down');$('wave').classList.add('on');$('talktxt').textContent='Talking...'};
+  const tRelease=e=>{if(!tDown)return;e.preventDefault();e.stopPropagation();tDown=false;talkEl.classList.remove('down');$('wave').classList.remove('on');$('talktxt').textContent='Hold to talk';if(Date.now()-tAt<300||!cur)return;if(part<cur.length-1)playPart(part+1)};
+  talkEl.addEventListener('pointerdown',tPress);talkEl.addEventListener('pointerup',tRelease);talkEl.addEventListener('pointercancel',tRelease);talkEl.addEventListener('pointerleave',tRelease);
+  $('talkbar').addEventListener('click',e=>e.stopPropagation());$('talkbar').addEventListener('touchstart',e=>e.stopPropagation(),{passive:true});
+  talkEl.addEventListener('contextmenu',e=>e.preventDefault());
   $('close').addEventListener('click',e=>{e.stopPropagation();if(!busy)closeCam()});
   let sy=null,swiped=false;
   cam.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;swiped=false},{passive:true});
   cam.addEventListener('touchmove',e=>{if(sy!==null&&e.touches[0].clientY-sy>70&&!swiped&&!busy){swiped=true;closeCam()}},{passive:true});
-  cam.addEventListener('click',()=>{if(swiped){swiped=false;return}if(busy||!cur)return;if(part<cur.length-1)playPart(part+1);else closeCam()});
+  cam.addEventListener('click',()=>{if(swiped){swiped=false;return}if(busy||!cur||talkRoom)return;if(part<cur.length-1)playPart(part+1);else closeCam()});
 
   const reconnecting=(tile,name)=>{flashTile(tile);$('msgtxt').textContent=name+' camera: Reconnecting...';msg.style.display='flex';setTimeout(()=>msg.style.display='none',2200)};
-  Object.entries(ROOMS).forEach(([id,r])=>{const t=$(id);t.addEventListener('click',()=>r.clips.length?openCam(t,r.clips):reconnecting(t,r.name))});
+  Object.entries(ROOMS).forEach(([id,r])=>{const t=$(id);t.addEventListener('click',()=>r.clips.length?openCam(t,r.clips,r.talk):reconnecting(t,r.name))});
   msg.addEventListener('click',()=>msg.style.display='none');
 }
 </script>
