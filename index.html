@@ -19,23 +19,23 @@
 *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 html,body{height:100%;background:#000;overflow:hidden;touch-action:manipulation;overscroll-behavior:none;position:fixed;inset:0}
 body{display:flex;align-items:center;justify-content:center;font-family:-apple-system,system-ui,sans-serif}
-#stage{position:relative;width:min(100vw,calc(100vh * 941 / 1672));height:min(100vh,calc(100vw * 1672 / 941));overflow:hidden;background:#0a1630}
-@supports (height:100dvh){#stage{width:min(100vw,calc(100dvh * 941 / 1672));height:min(100dvh,calc(100vw * 1672 / 941))}}
+#stage{position:relative;width:min(100vw,calc(100vh * 941 / 2039));height:min(100vh,calc(100vw * 2039 / 941));overflow:hidden;background:#0a1630}
+@supports (height:100dvh){#stage{width:min(100vw,calc(100dvh * 941 / 2039));height:min(100dvh,calc(100vw * 2039 / 941))}}
 #home{position:absolute;inset:0;width:100%;height:100%;display:block}
 .hot{position:absolute;border-radius:4%;cursor:pointer}
 .hot.flash{animation:tap .35s ease}
 @keyframes tap{40%{box-shadow:0 0 0 .6vh #fff inset,0 0 3vh #fff;background:rgba(255,255,255,.18)}}
-#fd{left:2.1%;top:30.9%;width:47.2%;height:24.4%}
-#ki{left:50.7%;top:30.9%;width:47.2%;height:24.4%}
-#lr{left:2.1%;top:56.2%;width:47.2%;height:24.4%}
-#of{left:50.7%;top:56.2%;width:47.2%;height:24.4%}
-#title{left:12%;top:2.5%;width:76%;height:9%}
-#homebtn{left:4%;top:85%;width:22%;height:11%}
-#badge{position:absolute;left:85.2%;top:87.6%;transform:translate(-50%,-50%);min-width:5.8%;aspect-ratio:1;height:auto;padding:0 1.2%;border-radius:999px;background:#e8202a;color:#fff;font-weight:800;font-size:clamp(10px,2.1vh,26px);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 .35vh #0b1b38;pointer-events:none}
-#badge.wide{aspect-ratio:auto;height:3.3%;min-width:9%}
+#fd{left:2.1%;top:31.63%;width:47.2%;height:20.01%}
+#ki{left:50.7%;top:31.63%;width:47.2%;height:20.01%}
+#lr{left:2.1%;top:52.43%;width:47.2%;height:19.86%}
+#of{left:50.7%;top:52.43%;width:47.2%;height:19.86%}
+#title{left:12%;top:8.39%;width:76%;height:7.36%}
+#homebtn{left:4%;top:87.7%;width:22%;height:9%}
+#badge{position:absolute;left:85.2%;top:89.85%;transform:translate(-50%,-50%);min-width:5.8%;aspect-ratio:1;height:auto;padding:0 1.2%;border-radius:999px;background:#e8202a;color:#fff;font-weight:800;font-size:clamp(10px,2.1vh,26px);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 .35vh #0b1b38;pointer-events:none}
+#badge.wide{aspect-ratio:auto;height:2.7%;min-width:9%}
 #badge.pop{animation:pop .45s ease}
 @keyframes pop{45%{transform:translate(-50%,-50%) scale(1.45)}}
-#pill{position:absolute;left:66.3%;top:13%;width:31.2%;height:9.3%;border-radius:18%/30%;pointer-events:none}
+#pill{position:absolute;left:66.3%;top:16.97%;width:31.2%;height:7.6%;border-radius:18%/30%;pointer-events:none}
 #pill.glow{animation:glow 1.6s ease-in-out infinite}
 @keyframes glow{50%{box-shadow:0 0 2.2vh rgba(255,40,40,.75),inset 0 0 1.4vh rgba(255,60,60,.5)}}
 #pill.flash{animation:flash .25s ease 4}
