@@ -88,7 +88,7 @@ body{display:flex;align-items:center;justify-content:center;font-family:-apple-s
   const vids={};
   const allClips=[...Object.values(ROOMS).flatMap(r=>r.clips),...FINALE.clips];
   allClips.forEach(src=>{const v=document.createElement('video');v.playsInline=true;v.setAttribute('playsinline','');v.preload='auto';cam.appendChild(v);vids[src]=v;fetch(src).then(r=>r.blob()).then(b=>{v.src=URL.createObjectURL(b);v.load()}).catch(()=>{v.src=src;v.load()})});
-  if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{})}
+  if('serviceWorker' in navigator&&location.protocol==='https:'){const hadCtl=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{try{r.update()}catch(e){}}).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadCtl&&!window.__rl){window.__rl=1;location.reload()}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})})}
 
   /* keep the screen awake where allowed */
   const wake=()=>{try{navigator.wakeLock&&navigator.wakeLock.request('screen').catch(()=>{})}catch(e){}};
