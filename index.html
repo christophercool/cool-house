@@ -9,47 +9,57 @@
 <meta name="apple-mobile-web-app-title" content="Cool House">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#0d0f12">
 <style>
-/* VOICE: a real-feeling smart-home app, playful underneath
-   IDEA: the Cool House camera app from the show, working for real
-   PICTURE: the finished home screen art, with live badge and tappable tiles
-   COLOUR and TYPE: from the artwork; red alert badge; system font
-   LAYOUT: one 9:16 stage, centred on black, video zooms out of the tile */
-*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-html,body{height:100%;background:#000;overflow:hidden;touch-action:manipulation;overscroll-behavior:none;position:fixed;inset:0}
-body{display:flex;align-items:center;justify-content:center;font-family:-apple-system,system-ui,sans-serif}
-#stage{position:relative;width:min(100vw,calc(100vh * 941 / 2039));height:min(100vh,calc(100vw * 2039 / 941));overflow:hidden;background:#0a1630}
-@supports (height:100dvh){#stage{width:min(100vw,calc(100dvh * 941 / 2039));height:min(100dvh,calc(100vw * 2039 / 941))}}
-#home{position:absolute;inset:0;width:100%;height:100%;display:block}
-.hot{position:absolute;border-radius:4%;cursor:pointer}
-.hot.flash{animation:tap .35s ease}
-@keyframes tap{40%{box-shadow:0 0 0 .6vh #fff inset,0 0 3vh #fff;background:rgba(255,255,255,.18)}}
-#fd{left:2.1%;top:31.63%;width:47.2%;height:20.01%}
-#ki{left:50.7%;top:31.63%;width:47.2%;height:20.01%}
-#lr{left:2.1%;top:52.43%;width:47.2%;height:19.86%}
-#of{left:50.7%;top:52.43%;width:47.2%;height:19.86%}
-#title{left:12%;top:8.39%;width:76%;height:7.36%}
-#homebtn{left:4%;top:87.7%;width:22%;height:9%}
-#badge{position:absolute;left:85.2%;top:89.85%;transform:translate(-50%,-50%);min-width:5.8%;aspect-ratio:1;height:auto;padding:0 1.2%;border-radius:999px;background:#e8202a;color:#fff;font-weight:800;font-size:clamp(10px,2.1vh,26px);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 .35vh #0b1b38;pointer-events:none}
-#badge.wide{aspect-ratio:auto;height:2.7%;min-width:9%}
+/* VOICE: a real, modern smart-home camera app, believable on a TV across a room
+   IDEA: the Cool House app from the show, working for real
+   PICTURE: the four live camera tiles, then a full-screen camera feed
+   COLOUR and TYPE: near-black chrome, red LIVE and alert accents, iPhone system font
+   LAYOUT: header, status chips, alert, 2x2 camera grid, bottom tab bar; camera zooms out of its tile */
+:root{--bg:#0d0f12;--card:#1a1d22;--line:#2a2e35;--ink:#fff;--mute:#9aa3ad;--red:#ff3b30;--blue:#2f7dff}
+*{box-sizing:border-box;margin:0;min-width:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touch-action:manipulation;overscroll-behavior:none;position:fixed;inset:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif}
+#stage{position:absolute;inset:0;overflow:hidden}
+#home{position:absolute;inset:0;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 3vh) 4.5vw 0}
+#title{font-size:clamp(30px,4.6vh,48px);font-weight:800;letter-spacing:-.5px;align-self:flex-start;padding:.4vh 0;cursor:pointer}
+.chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2.2vw;margin-top:1.6vh}
+.chip{background:var(--card);border-radius:14px;padding:1.2vh 2.6vw;font-size:clamp(12px,1.6vh,17px);color:var(--mute);line-height:1.25}
+.chip b{display:block;color:var(--ink);font-size:clamp(14px,1.95vh,20px);font-weight:700}
+.chip.alarm{background:#3a1416}.chip.alarm b{color:#ff6a60}
+#alert{margin-top:1.6vh;background:var(--card);border-radius:14px;padding:1.4vh 3.6vw;font-size:clamp(14px,1.9vh,19px);font-weight:600;display:flex;gap:2.6vw;align-items:center}
+#alert i{width:10px;height:10px;border-radius:50%;background:var(--red);flex:none;animation:pulse 1.2s infinite}
+#alert.flash{animation:aflash .3s ease 4}
+@keyframes aflash{50%{background:#5a1a1d}}
+.sec{display:flex;align-items:center;gap:6px;margin:2.4vh 0 1.2vh;font-size:clamp(18px,2.5vh,26px);font-weight:800}
+.sec span{color:var(--mute);font-weight:600}
+.grid{flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr;gap:2.6vw;margin-bottom:2.4vh;max-height:62vh}
+.tile{position:relative;border-radius:16px;overflow:hidden;background:#000;cursor:pointer;box-shadow:0 0 0 1px var(--line)}
+.tile img{width:100%;height:100%;object-fit:cover;display:block}
+.tile::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,rgba(0,0,0,.65))}
+.tile span{position:absolute;left:3vw;bottom:1.2vh;font-weight:800;font-size:clamp(15px,2.15vh,22px);text-shadow:0 1px 6px #000;z-index:1}
+.tile.flash{animation:tap .35s ease}
+@keyframes tap{40%{box-shadow:0 0 0 3px #fff}}
+.pill{position:absolute;top:1.1vh;left:2.4vw;background:var(--red);color:#fff;font-weight:800;font-size:clamp(11px,1.45vh,15px);padding:.35vh 2.2vw;border-radius:999px;display:flex;gap:1.4vw;align-items:center;z-index:1}
+.pill i{width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 1.2s infinite}
+#tabs{margin-top:auto;margin-left:-4.5vw;margin-right:-4.5vw;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);background:#111418;padding:1.2vh 0 calc(env(safe-area-inset-bottom,0px) + 1.2vh)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:.4vh;color:var(--mute);font-size:clamp(11px,1.4vh,14px);font-weight:600;position:relative}
+.tab svg{width:3.2vh;height:3.2vh}
+.tab.on{color:var(--ink)}
+#badge{position:absolute;top:-.6vh;left:calc(50% + 1.1vh);min-width:2.5vh;height:2.5vh;padding:0 .7vh;border-radius:999px;background:var(--red);color:#fff;font-weight:800;font-size:1.5vh;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #111418}
 #badge.pop{animation:pop .45s ease}
-@keyframes pop{45%{transform:translate(-50%,-50%) scale(1.45)}}
-#pill{position:absolute;left:66.3%;top:16.97%;width:31.2%;height:7.6%;border-radius:18%/30%;pointer-events:none}
-#pill.glow{animation:glow 1.6s ease-in-out infinite}
-@keyframes glow{50%{box-shadow:0 0 2.2vh rgba(255,40,40,.75),inset 0 0 1.4vh rgba(255,60,60,.5)}}
-#pill.flash{animation:flash .25s ease 4}
-@keyframes flash{50%{background:rgba(255,60,60,.45)}}
-#cam{position:absolute;inset:0;background:#000;display:none;transform-origin:0 0}
+@keyframes pop{45%{transform:scale(1.5)}}
+@keyframes pulse{50%{opacity:.35}}
+#cam{position:absolute;inset:0;z-index:4;background:#000;display:none;transform-origin:0 0;overflow:hidden}
 #cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .2s}
 #cam video.on{opacity:1}
 #cam.zoom{transition:transform .45s cubic-bezier(.2,.8,.2,1),border-radius .45s}
-#close{position:absolute;top:calc(env(safe-area-inset-top,0px) + 1.2%);right:3%;width:5.2vh;height:5.2vh;border-radius:50%;background:rgba(0,0,0,.55);border:.25vh solid rgba(255,255,255,.85);color:#fff;display:none;align-items:center;justify-content:center;font-size:3.2vh;line-height:1;font-weight:600;z-index:5;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#camtop{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top,0px) + 1.6vh) 4vw 5vh;background:linear-gradient(rgba(0,0,0,.6),transparent);display:none;align-items:center;justify-content:center;z-index:5;pointer-events:none}
+#camtop.show{display:flex}
+#camtop .pill{position:absolute;top:auto;left:4vw;font-size:1.6vh;padding:.45vh 1.4vh}
+#camname{font-size:2.8vh;font-weight:800;text-shadow:0 2px 8px #000}
+#close{position:absolute;top:calc(env(safe-area-inset-top,0px) + 1.1vh);right:3.5vw;width:5vh;height:5vh;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;display:none;align-items:center;justify-content:center;font-size:2.8vh;line-height:1;font-weight:600;z-index:6;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 #close.show{display:flex}
-#msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2.5vh;background:rgba(5,12,28,.94);color:#fff;font-weight:700;font-size:2.6vh;text-align:center}
-#msg .spin{width:6vh;height:6vh;border-radius:50%;border:.7vh solid rgba(255,255,255,.2);border-top-color:#fff;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-#talkbar{position:absolute;left:0;right:0;bottom:0;padding:6vh 0 calc(env(safe-area-inset-bottom,0px) + 3.5vh);display:none;flex-direction:column;align-items:center;gap:1.4vh;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.7));z-index:5}
+#talkbar{position:absolute;left:0;right:0;bottom:0;padding:6vh 0 calc(env(safe-area-inset-bottom,0px) + 3.5vh);display:none;flex-direction:column;align-items:center;gap:1.4vh;background:linear-gradient(transparent,rgba(0,0,0,.7));z-index:5}
 #talkbar.show{display:flex}
 #talklbl{color:#fff;font-weight:700;font-size:2vh;text-shadow:0 1px 6px #000;display:flex;align-items:center;gap:1vh;min-height:2.6vh}
 #wave{display:none;gap:.4vh;height:2.4vh;align-items:center}
@@ -59,23 +69,38 @@ body{display:flex;align-items:center;justify-content:center;font-family:-apple-s
 @keyframes wv{0%,100%{height:.5vh}50%{height:2.4vh}}
 #talk{width:11vh;height:11vh;border-radius:50%;background:#fff;color:#111;display:grid;place-items:center;touch-action:none;transition:transform .12s,background .12s;box-shadow:0 .8vh 3vh rgba(0,0,0,.55)}
 #talk svg{width:4.6vh;height:4.6vh}
-#talk.down{background:#2f7dff;color:#fff;transform:scale(1.12);box-shadow:0 0 0 1.3vh rgba(47,125,255,.35),0 0 0 2.8vh rgba(47,125,255,.15)}
-#hint{position:absolute;left:0;right:0;bottom:1.2%;text-align:center;color:rgba(255,255,255,.0);font-size:1.4vh;pointer-events:none}
+#talk.down{background:var(--blue);color:#fff;transform:scale(1.12);box-shadow:0 0 0 1.3vh rgba(47,125,255,.35),0 0 0 2.8vh rgba(47,125,255,.15)}
+#msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2.5vh;background:rgba(13,15,18,.95);color:#fff;font-weight:700;font-size:2.4vh;text-align:center;z-index:9}
+#msg .spin{width:6vh;height:6vh;border-radius:50%;border:.7vh solid rgba(255,255,255,.2);border-top-color:#fff;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){#cam.zoom{transition:none}}
 </style>
 </head>
 <body>
 <div id="stage">
-  <img id="home" src="home.jpg" alt="Cool House home screen">
-  <div id="pill" class="glow"></div>
-  <div id="badge">1</div>
-  <div class="hot" id="title" aria-label="Cool House"></div>
-  <div class="hot" id="fd" aria-label="Front Door"></div>
-  <div class="hot" id="ki" aria-label="Kitchen"></div>
-  <div class="hot" id="lr" aria-label="Living Room"></div>
-  <div class="hot" id="of" aria-label="Office"></div>
-  <div class="hot" id="homebtn" aria-label="Home"></div>
+  <section id="home">
+    <div id="title" aria-label="Cool House">Cool House</div>
+    <div class="chips">
+      <div class="chip">Doors<b>Locked</b></div>
+      <div class="chip">Inside<b>21°C</b></div>
+      <div class="chip alarm">Motion<b>Detected</b></div>
+    </div>
+    <div id="alert"><i></i><span id="alerttxt">Motion detected at your house</span></div>
+    <div class="sec">Cameras <span>›</span></div>
+    <div class="grid">
+      <div class="tile" id="fd"><img src="tile_fd.jpg" alt=""><div class="pill"><i></i>LIVE</div><span>Front Door</span></div>
+      <div class="tile" id="ki"><img src="tile_ki.jpg" alt=""><div class="pill"><i></i>LIVE</div><span>Kitchen</span></div>
+      <div class="tile" id="lr"><img src="tile_lr.jpg" alt=""><div class="pill"><i></i>LIVE</div><span>Living Room</span></div>
+      <div class="tile" id="of"><img src="tile_of.jpg" alt=""><div class="pill"><i></i>LIVE</div><span>Office</span></div>
+    </div>
+    <nav id="tabs">
+      <div class="tab on" id="homebtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</div>
+      <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Automations</div>
+      <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/></svg>Alerts<div id="badge">1</div></div>
+    </nav>
+  </section>
   <div id="cam"></div>
+  <div id="camtop"><div class="pill"><i></i>LIVE</div><div id="camname"></div></div>
   <div id="close" aria-label="Close camera">&#x2715;</div>
   <div id="talkbar">
     <div id="talklbl"><span id="wave"><b></b><b></b><b></b><b></b><b></b></span><span id="talktxt">Hold to talk</span></div>
@@ -104,14 +129,14 @@ body{display:flex;align-items:center;justify-content:center;font-family:-apple-s
   const FINALE={tile:'lr', clips:[]};
 
   const $=id=>document.getElementById(id);
-  const stage=$('stage'),cam=$('cam'),badge=$('badge'),pill=$('pill'),msg=$('msg');
-  let count=1,part=-1,busy=false,ac=null,cur=null,curTile=null;
+  const stage=$('stage'),cam=$('cam'),badge=$('badge'),msg=$('msg');
+  let count=1,part=-1,busy=false,ac=null,cur=null,curTile=null,talkRoom=false;
 
   /* preload every clip so nothing buffers mid-show */
-  const vids={};
   const norm=c=>typeof c==='string'?{v:c}:c;
   Object.values(ROOMS).forEach(r=>r.clips=r.clips.map(norm));FINALE.clips=FINALE.clips.map(norm);
   const allClips=[...Object.values(ROOMS).flatMap(r=>r.clips),...FINALE.clips].flatMap(c=>c.idle?[c.v,c.idle]:[c.v]);
+  const vids={};
   allClips.forEach(src=>{const v=document.createElement('video');v.playsInline=true;v.setAttribute('playsinline','');v.preload='auto';cam.appendChild(v);vids[src]=v;fetch(src).then(r=>r.blob()).then(b=>{v.src=URL.createObjectURL(b);v.load()}).catch(()=>{v.src=src;v.load()})});
   if('serviceWorker' in navigator&&location.protocol==='https:'){const hadCtl=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{try{r.update()}catch(e){}}).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadCtl&&!window.__rl){window.__rl=1;location.reload()}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})})}
 
@@ -122,11 +147,11 @@ body{display:flex;align-items:center;justify-content:center;font-family:-apple-s
   const audio=()=>{try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}return ac};
   const ding=()=>{const a=audio();if(!a)return;const t=a.currentTime;[[1318.5,0],[1760,.12]].forEach(([f,d])=>{const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.35,t+d+.01);g.gain.exponentialRampToValueAtTime(.001,t+d+.6);o.connect(g).connect(a.destination);o.start(t+d);o.stop(t+d+.65)})};
 
-  /* ---- badge ---- */
-  const setBadge=n=>{count=n;badge.textContent=n>99?'99+':n;badge.classList.toggle('wide',n>9);badge.classList.remove('pop');void badge.offsetWidth;badge.classList.add('pop')};
-  const flashPill=()=>{pill.classList.remove('flash');void pill.offsetWidth;pill.classList.add('flash');setTimeout(()=>pill.classList.remove('flash'),1100)};
-  const alertNew=()=>{ding();setBadge(count+1);flashPill()};
-  const finale=()=>{if(busy)return;busy=true;let n=count;const step=()=>{n+=n<10?1:n<30?3:9;if(n>=99){setBadge(100);ding();flashPill();busy=false;if(FINALE.clips.length)setTimeout(()=>openCam($(FINALE.tile),FINALE.clips),1200);return}setBadge(n);ding();setTimeout(step,Math.max(70,260-n*4))};step()};
+  /* ---- badge + alert banner ---- */
+  const setBadge=n=>{count=n;badge.textContent=n>99?'99+':n;badge.classList.remove('pop');void badge.offsetWidth;badge.classList.add('pop')};
+  const flashAlert=()=>{const a=$('alert');a.classList.remove('flash');void a.offsetWidth;a.classList.add('flash');setTimeout(()=>a.classList.remove('flash'),1300)};
+  const alertNew=()=>{ding();setBadge(count+1);flashAlert()};
+  const finale=()=>{if(busy)return;busy=true;let n=count;const step=()=>{n+=n<10?1:n<30?3:9;if(n>=99){setBadge(100);ding();flashAlert();$('alerttxt').textContent='99+ motion alerts!';busy=false;if(FINALE.clips.length)setTimeout(()=>openCam($(FINALE.tile),FINALE.clips,false,ROOMS[FINALE.tile].name),1200);return}setBadge(n);ding();setTimeout(step,Math.max(70,260-n*4))};step()};
 
   /* ---- secret controls on the title: tap = new alert, hold = 99+ finale ---- */
   let holdT=null,held=false;const title=$('title');
@@ -134,24 +159,23 @@ body{display:flex;align-items:center;justify-content:center;font-family:-apple-s
   title.addEventListener('pointerup',()=>{clearTimeout(holdT);if(!held)alertNew()});
   title.addEventListener('pointerleave',()=>clearTimeout(holdT));
   /* hold Home 1.5s = reset badge to 1 */
-  let rT=null;$('homebtn').addEventListener('pointerdown',()=>{rT=setTimeout(()=>setBadge(1),1500)});
+  let rT=null;$('homebtn').addEventListener('pointerdown',()=>{rT=setTimeout(()=>{setBadge(1);$('alerttxt').textContent='Motion detected at your house'},1500)});
   $('homebtn').addEventListener('pointerup',()=>clearTimeout(rT));
 
-  /* ---- open a camera: zoom out of its tile, play clip 1; tap = next clip; tap after last = back home ---- */
+  /* ---- open a camera: zoom out of its tile ---- */
   const flashTile=el=>{el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')};
   const tileXf=el=>{const sr=stage.getBoundingClientRect(),tr=el.getBoundingClientRect();return `translate(${tr.left-sr.left}px,${tr.top-sr.top}px) scale(${tr.width/sr.width},${tr.height/sr.height})`};
-  let talkRoom=false;
   /* iPhone only allows sound after a tap, so on opening a camera, quietly unlock every clip in that room */
   const prime=clips=>clips.flatMap(c=>c.idle?[c.v,c.idle]:[c.v]).slice(1).forEach(src=>{const v=vids[src];const p=(v.muted=true,v.play());const back=()=>{v.pause();try{v.currentTime=0}catch(e){}v.muted=false};if(p&&p.then)p.then(back).catch(()=>{v.muted=false});else back()});
-  const openCam=(tile,clips,talk)=>{
+  const openCam=(tile,clips,talk,name)=>{
     if(busy)return;busy=true;audio();wake();flashTile(tile);
-    cur=clips;curTile=tile;talkRoom=!!talk;
+    cur=clips;curTile=tile;talkRoom=!!talk;$('camname').textContent=name||'';
     Object.values(vids).forEach(v=>{v.pause();v.onended=null;v.classList.remove('on')});
     prime(clips);
     const first=vids[clips[0].v];first.currentTime=0;first.classList.add('on');
     cam.classList.remove('zoom');cam.style.display='block';cam.style.transform=tileXf(tile);cam.style.borderRadius='6%';
     requestAnimationFrame(()=>requestAnimationFrame(()=>{cam.classList.add('zoom');cam.style.transform='none';cam.style.borderRadius='0'}));
-    setTimeout(()=>{playPart(0);busy=false;$('close').classList.add('show');$('talkbar').classList.toggle('show',talkRoom)},470);
+    setTimeout(()=>{playPart(0);busy=false;$('close').classList.add('show');$('camtop').classList.add('show');$('talkbar').classList.toggle('show',talkRoom)},470);
   };
   /* show a video only once it is actually playing, so there is never a black flash */
   const playSrc=(src,loop)=>{
@@ -161,23 +185,24 @@ body{display:flex;align-items:center;justify-content:center;font-family:-apple-s
     const p=v.play();if(p&&p.catch)p.catch(()=>v.removeEventListener('playing',swap));
   };
   const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part===i&&c.idle)playSrc(c.idle,true)};playSrc(c.v,false)};
-  const closeCam=()=>{if(cam.style.display!=='block')return;busy=true;$('close').classList.remove('show');$('talkbar').classList.remove('show');Object.values(vids).forEach(v=>{v.pause();v.onended=null});cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false},470)};
+  const closeCam=()=>{if(cam.style.display!=='block')return;busy=true;['close','camtop','talkbar'].forEach(id=>$(id).classList.remove('show'));Object.values(vids).forEach(v=>{v.pause();v.onended=null});cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false},470)};
+  $('close').addEventListener('click',e=>{e.stopPropagation();if(!busy)closeCam()});
 
   /* ---- Talk button: hold while speaking, let go to play the next part (quick taps are ignored) ---- */
   const talkEl=$('talk');let tDown=false,tAt=0;
   const tPress=e=>{e.preventDefault();e.stopPropagation();tDown=true;tAt=Date.now();talkEl.classList.add('down');$('wave').classList.add('on');$('talktxt').textContent='Talking...'};
   const tRelease=e=>{if(!tDown)return;e.preventDefault();e.stopPropagation();tDown=false;talkEl.classList.remove('down');$('wave').classList.remove('on');$('talktxt').textContent='Hold to talk';if(Date.now()-tAt<300||!cur)return;if(part<cur.length-1)playPart(part+1)};
   talkEl.addEventListener('pointerdown',tPress);talkEl.addEventListener('pointerup',tRelease);talkEl.addEventListener('pointercancel',tRelease);talkEl.addEventListener('pointerleave',tRelease);
-  $('talkbar').addEventListener('click',e=>e.stopPropagation());$('talkbar').addEventListener('touchstart',e=>e.stopPropagation(),{passive:true});
   talkEl.addEventListener('contextmenu',e=>e.preventDefault());
-  $('close').addEventListener('click',e=>{e.stopPropagation();if(!busy)closeCam()});
+
+  /* ---- swipe down to close; in tap rooms, tap = next clip, tap after last = back home ---- */
   let sy=null,swiped=false;
   cam.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;swiped=false},{passive:true});
   cam.addEventListener('touchmove',e=>{if(sy!==null&&e.touches[0].clientY-sy>70&&!swiped&&!busy){swiped=true;closeCam()}},{passive:true});
   cam.addEventListener('click',()=>{if(swiped){swiped=false;return}if(busy||!cur||talkRoom)return;if(part<cur.length-1)playPart(part+1);else closeCam()});
 
   const reconnecting=(tile,name)=>{flashTile(tile);$('msgtxt').textContent=name+' camera: Reconnecting...';msg.style.display='flex';setTimeout(()=>msg.style.display='none',2200)};
-  Object.entries(ROOMS).forEach(([id,r])=>{const t=$(id);t.addEventListener('click',()=>r.clips.length?openCam(t,r.clips,r.talk):reconnecting(t,r.name))});
+  Object.entries(ROOMS).forEach(([id,r])=>{const t=$(id);t.addEventListener('click',()=>r.clips.length?openCam(t,r.clips,r.talk,r.name):reconnecting(t,r.name))});
   msg.addEventListener('click',()=>msg.style.display='none');
 }
 </script>
