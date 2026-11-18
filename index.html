@@ -89,6 +89,10 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 .tile .offtxt .nr{position:static;font-size:clamp(14px,2vh,21px);font-weight:500;color:#9aa3ad;text-shadow:none;left:auto;bottom:auto}
 .tile.off .offtxt{display:flex}
 .tile .offtxt svg{width:5vh;height:5vh;color:#9aa3ad;margin-bottom:auto}
+.chip#doors{cursor:pointer;transition:background .25s}
+.chip#doors.unlocked{background:#3a2c0e;animation:dp 1.1s ease-in-out infinite}.chip#doors.unlocked b{color:#ffb020}
+.chip#doors.justlocked b{color:#34c759}
+@keyframes dp{50%{box-shadow:0 0 0 2px #ffb02066,0 0 2.4vh #ffb02055}}
 #msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2.5vh;background:rgba(13,15,18,.95);color:#fff;font-weight:700;font-size:2.4vh;text-align:center;z-index:9}
 #msg .spin{width:6vh;height:6vh;border-radius:50%;border:.7vh solid rgba(255,255,255,.2);border-top-color:#fff;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -100,7 +104,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   <section id="home">
     <div id="title" aria-label="Cool House">Cool House</div>
     <div class="chips">
-      <div class="chip">Doors<b>Locked</b></div>
+      <div class="chip" id="doors">Doors<b id="doorstxt">Locked</b></div>
       <div class="chip">Inside<b>21°C</b></div>
       <div class="chip alarm">Motion<b>Detected</b></div>
     </div>
@@ -182,7 +186,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   title.addEventListener('pointerup',()=>{clearTimeout(holdT);if(!held)alertNew();else unlockLoud(FINALE.clips)});
   title.addEventListener('pointerleave',()=>clearTimeout(holdT));
   /* hold Home 1.5s = reset badge to 1 */
-  let rT=null;$('homebtn').addEventListener('pointerdown',()=>{rT=setTimeout(()=>{setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));flashTile($('homebtn'))},1500)});
+  let rT=null;$('homebtn').addEventListener('pointerdown',()=>{rT=setTimeout(()=>{setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));unlocked=false;fdDone=false;$('doors').classList.remove('unlocked');$('doorstxt').textContent='Locked';flashTile($('homebtn'))},1500)});
   $('homebtn').addEventListener('pointerup',()=>clearTimeout(rT));
 
   /* ---- open a camera: zoom out of its tile ---- */
@@ -213,16 +217,18 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   };
   const offline=new Set();
   const setOffline=(id,on)=>{const t=$(id);if(!t)return;t.classList.toggle('off',on);on?offline.add(id):offline.delete(id)};
-  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part!==i)return;if(c.idle)playSrc(c.idle,true);};v.ontimeupdate=()=>{if(curRoom&&ROOMS[curRoom].goesOffline&&v.currentTime>14.6){setOffline(curRoom,true);$('lightsbar').classList.remove('show');$('camtop').querySelector('.pill').style.visibility='hidden'}};playSrc(c.v,!!c.loop)};
+  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part!==i)return;if(curRoom==='fd'&&i===cur.length-1)fdDone=true;if(c.idle)playSrc(c.idle,true);};v.ontimeupdate=()=>{if(curRoom&&ROOMS[curRoom].goesOffline&&v.currentTime>14.6){setOffline(curRoom,true);$('lightsbar').classList.remove('show');$('camtop').querySelector('.pill').style.visibility='hidden'}};playSrc(c.v,!!c.loop)};
   /* LIGHTS: click sound, flash, room lit up with the elf caught frozen */
   const click=()=>{const a=audio();if(!a)return;const t=a.currentTime;const b=a.createBuffer(1,a.sampleRate*.04,a.sampleRate),d=b.getChannelData(0);for(let k=0;k<d.length;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/d.length,6);const s=a.createBufferSource(),g=a.createGain();g.gain.value=.9;s.buffer=b;s.connect(g).connect(a.destination);s.start(t)};
+  let litT=null;
+  const autoClose=ms=>{clearTimeout(litT);litT=setTimeout(()=>{if(lit&&cam.style.display==='block'&&!busy)closeCam()},ms)};
   const showLit=()=>{const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');$('lightsimg').classList.add('on')};
   $('lightsbtn').addEventListener('click',e=>{e.stopPropagation();if(lit||busy||!cur)return;const c=cur[part];
-    if(c&&c.onLights){lit=true;$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on';Object.values(vids).forEach(v=>v.onended=null);if(curLights)showLit();playSrc(c.onLights,false);return}
+    if(c&&c.onLights){lit=true;$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on';Object.values(vids).forEach(v=>v.onended=null);if(curLights)showLit();playSrc(c.onLights,false);autoClose(4000);return}
     if(!curLights){click();return}
-    lit=true;click();Object.values(vids).forEach(v=>{v.pause();v.onended=null});showLit();$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on'});
+    lit=true;click();Object.values(vids).forEach(v=>{v.pause();v.onended=null});showLit();autoClose(3000);$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on'});
   $('lightsbar').addEventListener('click',e=>e.stopPropagation());
-  const closeCam=()=>{if(cam.style.display!=='block')return;busy=true;$('lightsimg').classList.remove('on');lit=false;['close','camtop','talkbar','lightsbar'].forEach(id=>$(id).classList.remove('show'));Object.values(vids).forEach(v=>{v.pause();v.onended=null});cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false},470)};
+  const closeCam=()=>{if(cam.style.display!=='block')return;clearTimeout(litT);busy=true;$('lightsimg').classList.remove('on');lit=false;['close','camtop','talkbar','lightsbar'].forEach(id=>$(id).classList.remove('show'));Object.values(vids).forEach(v=>{v.pause();v.onended=null});cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false;if(curRoom==='fd'&&fdDone&&!unlocked){fdDone=false;setTimeout(()=>setDoor(true),1500)}},470)};
   $('close').addEventListener('click',e=>{e.stopPropagation();if(!busy)closeCam()});
 
   /* ---- Talk button: hold while speaking, let go to play the next part (quick taps are ignored) ---- */
@@ -232,6 +238,12 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   talkEl.addEventListener('pointerdown',tPress);talkEl.addEventListener('pointerup',tRelease);talkEl.addEventListener('pointercancel',tRelease);talkEl.addEventListener('pointerleave',tRelease);
   talkEl.addEventListener('contextmenu',e=>e.preventDefault());
 
+
+  /* ---- door lock: after the Front Door bit, the door 'unlocks'; tap Doors to lock it again ---- */
+  let unlocked=false,fdDone=false;
+  const setDoor=u=>{unlocked=u;const d=$('doors');d.classList.toggle('unlocked',u);$('doorstxt').textContent=u?'Unlocked':'Locked';
+    if(u){ding();$('alerttxt').textContent='Front Door was unlocked';flashAlert()}else{d.classList.add('justlocked');setTimeout(()=>d.classList.remove('justlocked'),1500)}};
+  $('doors').addEventListener('click',()=>{audio();if(unlocked){click();setDoor(false);$('alerttxt').textContent='Front Door locked'}else setDoor(true)});
   /* ---- swipe down to close; in tap rooms, tap = next clip, tap after last = back home ---- */
   let sy=null,swiped=false;
   cam.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;swiped=false},{passive:true});
