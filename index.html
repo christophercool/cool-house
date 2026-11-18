@@ -53,11 +53,11 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 #cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .2s}
 #cam video.on{opacity:1}
 #cam.zoom{transition:transform .45s cubic-bezier(.2,.8,.2,1),border-radius .45s}
-#camtop{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top,0px) + 1.6vh) 4vw 5vh;background:linear-gradient(rgba(0,0,0,.6),transparent);display:none;align-items:center;justify-content:center;z-index:5;pointer-events:none}
+#camtop{position:absolute;left:0;right:0;top:0;padding:calc(env(safe-area-inset-top,0px) + 1.6vh) 4vw 5vh;background:linear-gradient(rgba(0,0,0,.6),transparent);display:none;align-items:center;justify-content:center;z-index:7;pointer-events:none}
 #camtop.show{display:flex}
 #camtop .pill{position:absolute;top:auto;left:4vw;font-size:1.6vh;padding:.45vh 1.4vh}
 #camname{font-size:2.8vh;font-weight:800;text-shadow:0 2px 8px #000}
-#close{position:absolute;top:calc(env(safe-area-inset-top,0px) + 1.1vh);right:3.5vw;width:5vh;height:5vh;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;display:none;align-items:center;justify-content:center;font-size:2.8vh;line-height:1;font-weight:600;z-index:6;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#close{position:absolute;top:calc(env(safe-area-inset-top,0px) + 1.1vh);right:3.5vw;width:5vh;height:5vh;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;display:none;align-items:center;justify-content:center;font-size:2.8vh;line-height:1;font-weight:600;z-index:8;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 #close.show{display:flex}
 #talkbar{position:absolute;left:0;right:0;bottom:0;padding:6vh 0 calc(env(safe-area-inset-bottom,0px) + 3.5vh);display:none;flex-direction:column;align-items:center;gap:1.4vh;background:linear-gradient(transparent,rgba(0,0,0,.7));z-index:5}
 #talkbar.show{display:flex}
@@ -70,6 +70,17 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 #talk{width:11vh;height:11vh;border-radius:50%;background:#fff;color:#111;display:grid;place-items:center;touch-action:none;transition:transform .12s,background .12s;box-shadow:0 .8vh 3vh rgba(0,0,0,.55)}
 #talk svg{width:4.6vh;height:4.6vh}
 #talk.down{background:var(--blue);color:#fff;transform:scale(1.12);box-shadow:0 0 0 1.3vh rgba(47,125,255,.35),0 0 0 2.8vh rgba(47,125,255,.15)}
+#lightsimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none;z-index:5;transition:opacity .25s}
+#lightsimg.on{opacity:1}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:6}
+#flash.go{animation:fl .5s ease-out}
+@keyframes fl{0%{opacity:.9}100%{opacity:0}}
+#lightsbar{position:absolute;left:0;right:0;bottom:0;padding:6vh 0 calc(env(safe-area-inset-bottom,0px) + 3.5vh);display:none;flex-direction:column;align-items:center;gap:1.4vh;background:linear-gradient(transparent,rgba(0,0,0,.7));z-index:7}
+#lightsbar.show{display:flex}
+#lightsbtn{width:11vh;height:11vh;border-radius:50%;background:#ffd23f;color:#111;display:grid;place-items:center;box-shadow:0 .8vh 3vh rgba(0,0,0,.55),0 0 3vh rgba(255,210,63,.45);animation:lp 1.4s ease-in-out infinite}
+#lightsbtn svg{width:5vh;height:5vh}
+@keyframes lp{50%{box-shadow:0 .8vh 3vh rgba(0,0,0,.55),0 0 5vh rgba(255,210,63,.8)}}
+#lightslbl{color:#fff;font-weight:700;font-size:2vh;text-shadow:0 1px 6px #000}
 #msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2.5vh;background:rgba(13,15,18,.95);color:#fff;font-weight:700;font-size:2.4vh;text-align:center;z-index:9}
 #msg .spin{width:6vh;height:6vh;border-radius:50%;border:.7vh solid rgba(255,255,255,.2);border-top-color:#fff;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -106,6 +117,9 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     <div id="talklbl"><span id="wave"><b></b><b></b><b></b><b></b><b></b></span><span id="talktxt">Hold to talk</span></div>
     <div id="talk" aria-label="Hold to talk"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg></div>
   </div>
+  <img id="lightsimg" alt="">
+  <div id="flash"></div>
+  <div id="lightsbar"><div id="lightslbl">Lights</div><div id="lightsbtn" aria-label="Turn on lights"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 21h6v-1H9v1zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2z"/></svg></div></div>
   <div id="msg"><div class="spin"></div><div id="msgtxt">Reconnecting...</div></div>
 </div>
 <script>
@@ -121,8 +135,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
       {v:'fd3.mp4',idle:'fd3_idle.mp4'},  // "Elf me in, it's freezing out here!"   -> "NOPE! No elves allowed!"
       {v:'fd4.mp4'}                       // nyah-nyah, then freezes like a doll
     ]},
-    ki:{name:'Kitchen',    clips:['ki1.mp4']},              // cookie thief, freezes hugging a cookie
-    lr:{name:'Living Room',clips:['lr1.mp4']},              // couch trampoline, flips, lands like a starfish
+    ki:{name:'Kitchen',    clips:['ki1.mp4'], lights:'ki_lights.jpg'},              // cookie thief, freezes hugging a cookie
+    lr:{name:'Living Room',clips:['lr1.mp4'], lights:'lr_lights.jpg'},              // couch trampoline, flips, lands like a starfish
     of:{name:'Office',     clips:['of1.mp4']}               // moustache on Christopher's photo, pulls the plug, CAMERA OFFLINE
   };
   /* finale: plays after the 99+ count, zooming out of this tile */
@@ -130,7 +144,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 
   const $=id=>document.getElementById(id);
   const stage=$('stage'),cam=$('cam'),badge=$('badge'),msg=$('msg');
-  let count=1,part=-1,busy=false,ac=null,cur=null,curTile=null,talkRoom=false;
+  let count=1,part=-1,busy=false,ac=null,cur=null,curTile=null,talkRoom=false,curLights=null,lit=false;
 
   /* preload every clip so nothing buffers mid-show */
   const norm=c=>typeof c==='string'?{v:c}:c;
@@ -167,8 +181,9 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const tileXf=el=>{const sr=stage.getBoundingClientRect(),tr=el.getBoundingClientRect();return `translate(${tr.left-sr.left}px,${tr.top-sr.top}px) scale(${tr.width/sr.width},${tr.height/sr.height})`};
   /* iPhone only allows sound after a tap, so on opening a camera, quietly unlock every clip in that room */
   const prime=clips=>clips.flatMap(c=>c.idle?[c.v,c.idle]:[c.v]).slice(1).forEach(src=>{const v=vids[src];const p=(v.muted=true,v.play());const back=()=>{v.pause();try{v.currentTime=0}catch(e){}v.muted=false};if(p&&p.then)p.then(back).catch(()=>{v.muted=false});else back()});
-  const openCam=(tile,clips,talk,name)=>{
+  const openCam=(tile,clips,talk,name,lights)=>{
     if(busy)return;busy=true;audio();wake();flashTile(tile);
+    curLights=lights||null;lit=false;$('lightsimg').classList.remove('on');$('lightsbar').classList.remove('show');if(curLights)$('lightsimg').src=curLights;
     cur=clips;curTile=tile;talkRoom=!!talk;$('camname').textContent=name||'';
     Object.values(vids).forEach(v=>{v.pause();v.onended=null;v.classList.remove('on')});
     prime(clips);
@@ -184,8 +199,12 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     v.addEventListener('playing',swap);
     const p=v.play();if(p&&p.catch)p.catch(()=>v.removeEventListener('playing',swap));
   };
-  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part===i&&c.idle)playSrc(c.idle,true)};playSrc(c.v,false)};
-  const closeCam=()=>{if(cam.style.display!=='block')return;busy=true;['close','camtop','talkbar'].forEach(id=>$(id).classList.remove('show'));Object.values(vids).forEach(v=>{v.pause();v.onended=null});cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false},470)};
+  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part!==i)return;if(c.idle)playSrc(c.idle,true);else if(i===cur.length-1&&curLights&&!lit)$('lightsbar').classList.add('show')};playSrc(c.v,false)};
+  /* LIGHTS: click sound, flash, room lit up with the elf caught frozen */
+  const click=()=>{const a=audio();if(!a)return;const t=a.currentTime;const b=a.createBuffer(1,a.sampleRate*.04,a.sampleRate),d=b.getChannelData(0);for(let k=0;k<d.length;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/d.length,6);const s=a.createBufferSource(),g=a.createGain();g.gain.value=.9;s.buffer=b;s.connect(g).connect(a.destination);s.start(t)};
+  $('lightsbtn').addEventListener('click',e=>{e.stopPropagation();if(lit)return;lit=true;click();$('lightsbar').classList.remove('show');const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');$('lightsimg').classList.add('on')});
+  $('lightsbar').addEventListener('click',e=>e.stopPropagation());
+  const closeCam=()=>{if(cam.style.display!=='block')return;busy=true;$('lightsimg').classList.remove('on');lit=false;['close','camtop','talkbar','lightsbar'].forEach(id=>$(id).classList.remove('show'));Object.values(vids).forEach(v=>{v.pause();v.onended=null});cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false},470)};
   $('close').addEventListener('click',e=>{e.stopPropagation();if(!busy)closeCam()});
 
   /* ---- Talk button: hold while speaking, let go to play the next part (quick taps are ignored) ---- */
@@ -199,10 +218,10 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   let sy=null,swiped=false;
   cam.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;swiped=false},{passive:true});
   cam.addEventListener('touchmove',e=>{if(sy!==null&&e.touches[0].clientY-sy>70&&!swiped&&!busy){swiped=true;closeCam()}},{passive:true});
-  cam.addEventListener('click',()=>{if(swiped){swiped=false;return}if(busy||!cur||talkRoom)return;const pv=vids[cur[part].v];if(pv&&!pv.ended)return;if(part<cur.length-1)playPart(part+1);else closeCam()});
+  cam.addEventListener('click',()=>{if(swiped){swiped=false;return}if(busy||!cur||talkRoom)return;const pv=vids[cur[part].v];if(pv&&!pv.ended)return;if(curLights&&!lit&&part===cur.length-1)return;if(part<cur.length-1)playPart(part+1);else closeCam()});
 
   const reconnecting=(tile,name)=>{flashTile(tile);$('msgtxt').textContent=name+' camera: Reconnecting...';msg.style.display='flex';setTimeout(()=>msg.style.display='none',2200)};
-  Object.entries(ROOMS).forEach(([id,r])=>{const t=$(id);t.addEventListener('click',()=>r.clips.length?openCam(t,r.clips,r.talk,r.name):reconnecting(t,r.name))});
+  Object.entries(ROOMS).forEach(([id,r])=>{const t=$(id);t.addEventListener('click',()=>r.clips.length?openCam(t,r.clips,r.talk,r.name,r.lights):reconnecting(t,r.name))});
   msg.addEventListener('click',()=>msg.style.display='none');
 }
 </script>
