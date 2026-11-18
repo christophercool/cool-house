@@ -306,7 +306,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const tileXf=el=>{const sr=stage.getBoundingClientRect(),tr=el.getBoundingClientRect();return `translate(${tr.left-sr.left}px,${tr.top-sr.top}px) scale(${tr.width/sr.width},${tr.height/sr.height})`};
   /* iPhone only allows sound after a tap, so on opening a camera, quietly unlock every clip in that room */
   /* iPhone: a video may only play with sound later if it was started with sound inside a tap; start each quietly-paused */
-  const unlockLoud=clips=>clips.flatMap(c=>[c.v,c.idle,c.onLights]).filter(Boolean).forEach(src=>{const v=vids[src];if(!v||!v.paused)return;v.muted=false;const stop=()=>{v.removeEventListener('playing',stop);if(!v.classList.contains('on')){v.pause();try{v.currentTime=0}catch(e){}}};v.addEventListener('playing',stop);const p=v.play();if(p&&p.catch)p.catch(()=>{})});
+  const unlockLoud=clips=>clips.flatMap(c=>[c.v,c.idle]).filter(Boolean).forEach(src=>{const v=vids[src];if(!v||!v.paused)return;v.muted=false;const stop=()=>{v.removeEventListener('playing',stop);if(!v.classList.contains('on')){v.pause();try{v.currentTime=0}catch(e){}}};v.addEventListener('playing',stop);const p=v.play();if(p&&p.catch)p.catch(()=>{})});
   const prime=clips=>clips.flatMap(c=>[c.v,c.idle,c.onLights].filter(Boolean)).slice(1).forEach(src=>{const v=vids[src];if(!v)return;const p=(v.muted=true,v.play());const back=()=>{v.pause();try{v.currentTime=0}catch(e){}v.muted=false};if(p&&p.then)p.then(back).catch(()=>{v.muted=false});else back()});
   const openCam=(tile,clips,talk,name,lights)=>{
     if(busy)return;busy=true;audio();wake();flashTile(tile);
@@ -386,15 +386,23 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     c.addEventListener('pointerdown',()=>preUnlock(id),{once:true});
     openFromCard(c,(el,rect)=>roomFromLock(id,rect));
   };
-  const lockFinale=()=>{if(lkBusy)return;clearCards();setPod(true);const box=isLocked()?null:$('ban');if(box){card({title:'HomePod',body:'Now playing Jingle Bells in the Living Room.'},box)}else $('lk-np').classList.add('show');ding();
-    setTimeout(()=>{if(box)box.querySelectorAll('.ln').forEach(x=>x.remove());const c=card({title:'Living Room',body:'Motion was detected in the Living Room.',thumb:'tile_lr.jpg',stack:true,more:true},box);let n=1;const m=c.querySelector('.nm');
-      const step=()=>{n+=n<10?1:n<30?3:9;if(n>=99){m.textContent='99+ more notifications';setBadge(100);ding();return}m.textContent=n+' more notifications';setBadge(n);ding();setTimeout(step,Math.max(70,260-n*4))};step();
-      c.addEventListener('pointerdown',()=>unlockLoud(FINALE.clips),{once:true});
-      openFromCard(c,(el,rect)=>{$('lk-np').classList.remove('show');camOrigin={getBoundingClientRect:()=>rect};openCam($(FINALE.tile),FINALE.clips,false,ROOMS[FINALE.tile].name,FINALE.lights)})},1600)};
+  /* finale: hold clock = one Living Room notification waits quietly (show the phone on the TV),
+     then tap clock = alerts pile up slow then fast to 99+, then HomePod starts Jingle Bells; tap the stack = dance party */
+  let finStage=0,finCard=null;
+  const lockFinale=()=>{if(lkBusy)return;clearCards();$('lk-np').classList.remove('show');finStage=1;
+    finCard=card({title:'Living Room',body:'Motion was detected in the Living Room.',thumb:'tile_lr.jpg',stack:true,more:true});setBadge(count+1);
+    finCard.addEventListener('pointerdown',()=>unlockLoud(FINALE.clips),{once:true});
+    openFromCard(finCard,(el,rect)=>{finStage=0;$('lk-np').classList.remove('show');camOrigin={getBoundingClientRect:()=>rect};openCam($(FINALE.tile),FINALE.clips,false,ROOMS[FINALE.tile].name,FINALE.lights)})};
+  const finBuild=()=>{if(finStage!==1||!finCard)return;finStage=2;audio();const m=finCard.querySelector('.nm');let n=1,k=0;
+    const step=()=>{if(finStage!==2)return;k++;n+=n<6?1:n<15?2:n<40?5:12;
+      if(n>=99){m.textContent='99+ more notifications';setBadge(100);ding();
+        setTimeout(()=>{if(finStage!==2)return;setPod(true);$('lk-np').classList.add('show');ding()},1100);return}
+      m.textContent=n+' more notifications';setBadge(n);ding();setTimeout(step,Math.max(90,700-k*70))};
+    setTimeout(step,400)};
   /* clock: tap = next alert, hold = finale */
   let ckT=null,ckHeld=false;const ck=$('lk-time');
   ck.addEventListener('pointerdown',e=>{e.stopPropagation();audio();wake();ckHeld=false;ckT=setTimeout(()=>{ckHeld=true;lockFinale()},800)});
-  ck.addEventListener('pointerup',e=>{e.stopPropagation();clearTimeout(ckT);if(!ckHeld)nextAlert()});
+  ck.addEventListener('pointerup',e=>{e.stopPropagation();clearTimeout(ckT);if(!ckHeld){if(finStage===1)finBuild();else nextAlert()}});
   ck.addEventListener('pointerleave',()=>clearTimeout(ckT));
   /* swipe up = Face ID to home screen */
   let lsy=null;lock.addEventListener('pointerdown',e=>{lsy=e.clientY});
@@ -402,7 +410,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   /* hold flashlight = full reset */
   let flT=null;$('lk-flash').addEventListener('pointerdown',e=>{e.stopPropagation();flT=setTimeout(()=>{fullReset();click()},1500)});
   $('lk-flash').addEventListener('pointerup',()=>clearTimeout(flT));
-  function fullReset(){seqI=0;spShow();setTimeout(()=>{if(isLocked()&&!lkList.querySelector('.ln'))nextAlert()},50);clearCards();$('lk-np').classList.remove('show');setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));unlocked=false;fdDone=false;setPod(false);$('doors').classList.remove('unlocked');$('doorstxt').textContent='Locked';lockShow()}
+  function fullReset(){seqI=0;finStage=0;finCard=null;spShow();setTimeout(()=>{if(isLocked()&&!lkList.querySelector('.ln'))nextAlert()},50);clearCards();$('lk-np').classList.remove('show');setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));unlocked=false;fdDone=false;setPod(false);$('doors').classList.remove('unlocked');$('doorstxt').textContent='Locked';lockShow()}
 
   /* ===== iPhone icon screen =====
      widget clock: tap = next notification banner, hold = finale
