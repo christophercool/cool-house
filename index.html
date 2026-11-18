@@ -41,7 +41,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 @keyframes tap{40%{box-shadow:0 0 0 3px #fff}}
 .pill{position:absolute;top:1.1cqh;left:2.4cqw;background:var(--red);color:#fff;font-weight:800;font-size:clamp(11px,1.45cqh,15px);padding:.35cqh 2.2cqw;border-radius:999px;display:flex;gap:1.4cqw;align-items:center;z-index:1}
 .pill i{width:7px;height:7px;border-radius:50%;background:#fff;animation:pulse 1.2s infinite}
-#tabs{margin-top:auto;margin-left:-4.5cqw;margin-right:-4.5cqw;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);background:#111418;padding:1.2cqh 0 calc(0px + 1.2cqh)}
+#tabs{margin-top:auto;margin-left:-4.5cqw;margin-right:-4.5cqw;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);background:#111418;padding:1.2cqh 0 4.2cqh}
 .tab{display:flex;flex-direction:column;align-items:center;gap:.4cqh;color:var(--mute);font-size:clamp(11px,1.4cqh,14px);font-weight:600;position:relative}
 .tab svg{width:3.2cqh;height:3.2cqh}
 .tab.on{color:var(--ink)}
@@ -55,8 +55,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 #cam.zoom{transition:transform .45s cubic-bezier(.2,.8,.2,1),border-radius .45s}
 #camtop{position:absolute;left:0;right:0;top:0;padding:calc(0px + 4cqh) 4cqw 5cqh;background:linear-gradient(rgba(0,0,0,.6),transparent);display:none;align-items:center;justify-content:center;z-index:7;pointer-events:none}
 #camtop.show{display:flex}
-#camtop .pill{position:absolute;top:auto;left:4cqw;font-size:1.6cqh;padding:.45cqh 1.4cqh}
-#camname{font-size:2.8cqh;font-weight:800;text-shadow:0 2px 8px #000}
+#camtop .pill{position:absolute;top:auto;left:4cqw;font-size:1.85cqh;padding:.55cqh 1.6cqh}
+#camname{font-size:3.2cqh;font-weight:800;text-shadow:0 2px 8px #000}
 #close{position:absolute;top:calc(0px + 3.5cqh);right:3.5cqw;width:5cqh;height:5cqh;border-radius:50%;background:rgba(0,0,0,.5);color:#fff;display:none;align-items:center;justify-content:center;font-size:2.8cqh;line-height:1;font-weight:600;z-index:8;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 #close.show{display:flex}
 #talkbar{position:absolute;left:0;right:0;bottom:0;padding:6cqh 0 calc(0px + 3.5cqh);display:none;flex-direction:column;align-items:center;gap:1.4cqh;background:linear-gradient(transparent,rgba(0,0,0,.7));z-index:5}
