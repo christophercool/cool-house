@@ -403,6 +403,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   <div id="call" class="hide">
     <audio id="cl-ring" src="santa_ring.mp3" preload="auto" loop></audio>
     <audio id="cl-out" preload="auto"></audio>
+    <audio id="cl-wind" src="santa_vm.mp3" preload="auto" loop></audio>
     <div class="cl-in">
       <div class="cl-top"><div class="cl-sub">incoming call</div><div class="cl-name">Santa Claus</div><div class="cl-sub">North Pole</div></div>
       <div class="cl-mini"><div><span><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>Remind Me</div><div><span><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.4 1.3 4.6 3.4 6-.2 1.3-.8 2.6-1.8 3.6 2 0 3.8-.8 5-1.9 1.1.3 2.2.4 3.4.4 5.5 0 10-3.6 10-8s-4.5-8-10-8z"/></svg></span>Message</div></div>
@@ -731,7 +732,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const clRing=()=>{if(!call.classList.contains('hide'))return;try{ring.currentTime=0;const p=ring.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}clearInterval(clT);call.classList.remove('live','ended');call.querySelectorAll('.cl-g.on').forEach(g=>g.classList.remove('on'));kdx=0;knob.classList.remove('back');knob.style.transform='';$('cl-stx').style.opacity='';call.classList.remove('hide')};
   const clRecent=missed=>{clN++;const l=$('ph-rlist'),old=l.querySelector('.ph-santa');if(old)old.remove();
     l.insertAdjacentHTML('afterbegin',`<div class="ph-rc ph-santa${missed?' ph-miss':''}"${missed?' data-ph="vm"':''}><div class="ph-av" style="background:#7a1c1c url(santa.jpg) 30% 18%/260% auto"></div><div class="ph-mid"><div class="ph-txt"><div class="ph-nm">Santa Claus${clN>1?' ('+clN+')':''}</div><div class="ph-st">${IN} North Pole</div></div><span class="ph-wh">now</span><span class="ph-i">i</span></div></div>`)};
-  const clHide=()=>{ringStop();outStop();clearInterval(clT);call.classList.add('hide');setTimeout(()=>call.classList.remove('live','ended'),320);if(outCall){outCall=false;if(outAns)outAns=false;else afterOut()}else lockShow()};
+  const clHide=()=>{ringStop();outStop();windStop();clearInterval(clT);call.classList.add('hide');setTimeout(()=>call.classList.remove('live','ended'),320);if(outCall){outCall=false;if(outAns)outAns=false;else afterOut()}else lockShow()};
   const clAnswer=()=>{ringStop();audio();click();clS=0;$('cl-time').textContent='0:00';call.classList.add('live');clRecent(false);
     clT=setInterval(()=>{clS++;$('cl-time').textContent=Math.floor(clS/60)+':'+String(clS%60).padStart(2,'0')},1000)};
   /* slide to answer: drag the green knob to the right end */
@@ -757,7 +758,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     svT=setTimeout(()=>{const r=santaVM();if(!c1.isConnected||!isLocked())return;const c2=card({title:'Voicemail',body:'Santa Claus · 0:15',icon:VMIC});c2.classList.add('svc');c2.parentNode.insertBefore(c2,c1);ding();
       c2.addEventListener('pointerdown',phPrime,{once:true});openFromCard(c2,()=>phOpen('vm',r))},5000)};
   const cnm=call.querySelector('.cl-in .cl-name');cnm.style.cursor='pointer';cnm.addEventListener('pointerup',e=>{e.stopPropagation();clDecline()});
-  $('cl-end').addEventListener('click',e=>{e.stopPropagation();outStop();clearInterval(clT);call.classList.add('ended');$('cl-time').textContent='Call Ended';setTimeout(clHide,1300)});
+  $('cl-end').addEventListener('click',e=>{e.stopPropagation();outStop();windStop();clearInterval(clT);call.classList.add('ended');$('cl-time').textContent='Call Ended';setTimeout(clHide,1300)});
   call.querySelectorAll('.cl-g[data-t]').forEach(g=>g.addEventListener('click',e=>{e.stopPropagation();g.classList.toggle('on')}));
   call.addEventListener('pointerdown',e=>e.stopPropagation());call.addEventListener('pointerup',e=>e.stopPropagation());
   const lkCam=document.querySelectorAll('#lk-bot .lkb')[1];
@@ -805,6 +806,10 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   /* secret: tap Santa's photo or name WHILE IT'S RINGING = Santa picks up (silent call, timer runs). Don't tap = elf voicemail. */
   call.querySelector('.cl-live .cl-top').addEventListener('click',e=>{e.stopPropagation();if(!outCall||outStage!==1)return;outStop();outAns=true;outStage=5;click();
     clS=0;$('cl-time').textContent='0:00';clearInterval(clT);clT=setInterval(()=>{clS++;$('cl-time').textContent=Math.floor(clS/60)+':'+String(clS%60).padStart(2,'0')},1000)});
+  /* Speaker on a Santa call = loud wind + sleigh bells ("it's too windy up there!"); tap again to turn it off */
+  const wind=$('cl-wind');const windStop=()=>{try{wind.pause();wind.currentTime=0}catch(e){}};
+  const spk=call.querySelector('.cl-g[data-t]');
+  spk.addEventListener('click',()=>{if(spk.classList.contains('on')&&call.classList.contains('live')&&!call.classList.contains('ended')&&!(outCall&&outStage>=1&&outStage<=3)){if(blobs['santa_vm.mp3']&&wind.src!==blobs['santa_vm.mp3'])wind.src=blobs['santa_vm.mp3'];try{wind.currentTime=0;wind.volume=1;const p=wind.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}}else windStop()});
   const clRecentOut=()=>{const l=$('ph-rlist'),old=l.querySelector('.ph-santa');if(old)old.remove();
     l.insertAdjacentHTML('afterbegin',`<div class="ph-rc ph-santa"><div class="ph-av" style="background:#7a1c1c url(santa.jpg) 30% 18%/260% auto"></div><div class="ph-mid"><div class="ph-txt"><div class="ph-nm">Santa Claus</div><div class="ph-st">${OUT} sleigh phone</div></div><span class="ph-wh">now</span><span class="ph-i">i</span></div></div>`)};
   /* after hanging up: back in the Phone app, Santa texts back 5s later */
@@ -816,7 +821,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   ['mrs_claus_vm.mp3','santa_vm.mp3','santa_ring.mp3','ringback.mp3','santa_greet.mp3','vm_beep.mp3'].forEach(src=>fetch(src).then(r=>r.ok?r.blob():null).then(b=>{if(!b)return;blobs[src]=URL.createObjectURL(b);
     if(src==='santa_ring.mp3'&&ring.paused)ring.src=blobs[src];
     if(phCur&&phCur.dataset.src===src&&phA.paused&&!phA.currentTime){phA.src=blobs[src];try{phA.load()}catch(e){}}}).catch(()=>{}));
-  function phReset(){ringStop();clearInterval(clT);clearTimeout(svT);call.classList.add('hide');call.classList.remove('live','ended');clearTimeout(mcT);try{phA.pause();phA.currentTime=0}catch(e){}
+  function phReset(){ringStop();try{$('cl-wind').pause()}catch(e){}clearInterval(clT);clearTimeout(svT);call.classList.add('hide');call.classList.remove('live','ended');clearTimeout(mcT);try{phA.pause();phA.currentTime=0}catch(e){}
     const sv=$('ph-svm');if(sv){if(phCur===sv)phCur=null;sv.remove()}svN=0;clN=0;const rs=document.querySelector('#ph-rlist .ph-santa');if(rs)rs.remove();
     phRow.classList.remove('heard');phSel(phRow);phRow.classList.remove('open');vmBadge();ph.classList.add('hide');
     txN=0;txBusy=false;rpN=0;rpOn=false;outCall=false;outStop();document.querySelectorAll('#ban .ln').forEach(c=>c.remove());msBody.querySelectorAll('.ms-b,.ms-dots').forEach(b=>b.remove());$('ms-ts').innerHTML='iMessage<br>Today';$('ms').classList.add('hide');phDraw()}
