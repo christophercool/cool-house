@@ -148,7 +148,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     of:{name:'Office',     clips:['of1.mp4'], goesOffline:true}               // moustache on Christopher's photo, pulls the plug, CAMERA OFFLINE
   };
   /* finale: plays after the 99+ count, zooming out of this tile */
-  const FINALE={tile:'lr', clips:['finale.mp4']};
+  const FINALE={tile:'lr', lights:null, // add 'fin_lights.jpg' when ready
+    clips:[{v:'fin_dance.mp4', loop:true, onLights:'fin_freeze.mp4'}]}; // dance loops until Lights: record scratch + freeze
 
   const $=id=>document.getElementById(id);
   const stage=$('stage'),cam=$('cam'),badge=$('badge'),msg=$('msg');
@@ -157,7 +158,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   /* preload every clip so nothing buffers mid-show */
   const norm=c=>typeof c==='string'?{v:c}:c;
   Object.values(ROOMS).forEach(r=>r.clips=r.clips.map(norm));FINALE.clips=FINALE.clips.map(norm);
-  const allClips=[...Object.values(ROOMS).flatMap(r=>r.clips),...FINALE.clips].flatMap(c=>c.idle?[c.v,c.idle]:[c.v]);
+  const allClips=[...Object.values(ROOMS).flatMap(r=>r.clips),...FINALE.clips].flatMap(c=>[c.v,c.idle,c.onLights].filter(Boolean));
   const vids={};
   allClips.forEach(src=>{const v=document.createElement('video');v.playsInline=true;v.setAttribute('playsinline','');v.preload='auto';cam.appendChild(v);vids[src]=v;fetch(src).then(r=>r.blob()).then(b=>{v.src=URL.createObjectURL(b);v.load()}).catch(()=>{v.src=src;v.load()})});
   if('serviceWorker' in navigator&&location.protocol==='https:'){const hadCtl=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{try{r.update()}catch(e){}}).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadCtl&&!window.__rl){window.__rl=1;location.reload()}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})})}
@@ -173,7 +174,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const setBadge=n=>{count=n;badge.textContent=n>99?'99+':n;badge.classList.remove('pop');void badge.offsetWidth;badge.classList.add('pop')};
   const flashAlert=()=>{const a=$('alert');a.classList.remove('flash');void a.offsetWidth;a.classList.add('flash');setTimeout(()=>a.classList.remove('flash'),1300)};
   const alertNew=()=>{ding();setBadge(count+1);flashAlert()};
-  const finale=()=>{if(busy)return;busy=true;let n=count;const step=()=>{n+=n<10?1:n<30?3:9;if(n>=99){setBadge(100);ding();flashAlert();$('alerttxt').textContent='99+ motion alerts!';busy=false;if(FINALE.clips.length)setTimeout(()=>openCam($(FINALE.tile),FINALE.clips,false,ROOMS[FINALE.tile].name),1200);return}setBadge(n);ding();setTimeout(step,Math.max(70,260-n*4))};step()};
+  const finale=()=>{if(busy)return;busy=true;let n=count;const step=()=>{n+=n<10?1:n<30?3:9;if(n>=99){setBadge(100);ding();flashAlert();$('alerttxt').textContent='99+ motion alerts!';busy=false;if(FINALE.clips.length)setTimeout(()=>openCam($(FINALE.tile),FINALE.clips,false,ROOMS[FINALE.tile].name,FINALE.lights),1200);return}setBadge(n);ding();setTimeout(step,Math.max(70,260-n*4))};step()};
 
   /* ---- secret controls on the title: tap = new alert, hold = 99+ finale ---- */
   let holdT=null,held=false;const title=$('title');
@@ -188,7 +189,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const flashTile=el=>{el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')};
   const tileXf=el=>{const sr=stage.getBoundingClientRect(),tr=el.getBoundingClientRect();return `translate(${tr.left-sr.left}px,${tr.top-sr.top}px) scale(${tr.width/sr.width},${tr.height/sr.height})`};
   /* iPhone only allows sound after a tap, so on opening a camera, quietly unlock every clip in that room */
-  const prime=clips=>clips.flatMap(c=>c.idle?[c.v,c.idle]:[c.v]).slice(1).forEach(src=>{const v=vids[src];if(!v)return;const p=(v.muted=true,v.play());const back=()=>{v.pause();try{v.currentTime=0}catch(e){}v.muted=false};if(p&&p.then)p.then(back).catch(()=>{v.muted=false});else back()});
+  const prime=clips=>clips.flatMap(c=>[c.v,c.idle,c.onLights].filter(Boolean)).slice(1).forEach(src=>{const v=vids[src];if(!v)return;const p=(v.muted=true,v.play());const back=()=>{v.pause();try{v.currentTime=0}catch(e){}v.muted=false};if(p&&p.then)p.then(back).catch(()=>{v.muted=false});else back()});
   const openCam=(tile,clips,talk,name,lights)=>{
     if(busy)return;busy=true;audio();wake();flashTile(tile);
     curLights=lights||null;lit=false;$('lightsbtn').classList.remove('lit');$('lightslbl').textContent='Turn on lights';$('lightsimg').classList.remove('on');$('lightsbar').classList.remove('show');if(curLights)$('lightsimg').src=curLights;
@@ -209,10 +210,14 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   };
   const offline=new Set();
   const setOffline=(id,on)=>{const t=$(id);if(!t)return;t.classList.toggle('off',on);on?offline.add(id):offline.delete(id)};
-  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part!==i)return;if(c.idle)playSrc(c.idle,true);};v.ontimeupdate=()=>{if(curRoom&&ROOMS[curRoom].goesOffline&&v.currentTime>14.6){setOffline(curRoom,true);$('lightsbar').classList.remove('show')}};playSrc(c.v,false)};
+  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part!==i)return;if(c.idle)playSrc(c.idle,true);};v.ontimeupdate=()=>{if(curRoom&&ROOMS[curRoom].goesOffline&&v.currentTime>14.6){setOffline(curRoom,true);$('lightsbar').classList.remove('show')}};playSrc(c.v,!!c.loop)};
   /* LIGHTS: click sound, flash, room lit up with the elf caught frozen */
   const click=()=>{const a=audio();if(!a)return;const t=a.currentTime;const b=a.createBuffer(1,a.sampleRate*.04,a.sampleRate),d=b.getChannelData(0);for(let k=0;k<d.length;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/d.length,6);const s=a.createBufferSource(),g=a.createGain();g.gain.value=.9;s.buffer=b;s.connect(g).connect(a.destination);s.start(t)};
-  $('lightsbtn').addEventListener('click',e=>{e.stopPropagation();if(lit||busy)return;if(!curLights){click();return}lit=true;click();Object.values(vids).forEach(v=>{v.pause();v.onended=null});const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');$('lightsimg').classList.add('on');$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on'});
+  const showLit=()=>{const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');$('lightsimg').classList.add('on')};
+  $('lightsbtn').addEventListener('click',e=>{e.stopPropagation();if(lit||busy||!cur)return;const c=cur[part];
+    if(c&&c.onLights){lit=true;click();$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on';Object.values(vids).forEach(v=>v.onended=null);const fz=vids[c.onLights];fz.onended=()=>{if(curLights)showLit()};playSrc(c.onLights,false);return}
+    if(!curLights){click();return}
+    lit=true;click();Object.values(vids).forEach(v=>{v.pause();v.onended=null});showLit();$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on'});
   $('lightsbar').addEventListener('click',e=>e.stopPropagation());
   const closeCam=()=>{if(cam.style.display!=='block')return;busy=true;$('lightsimg').classList.remove('on');lit=false;['close','camtop','talkbar','lightsbar'].forEach(id=>$(id).classList.remove('show'));Object.values(vids).forEach(v=>{v.pause();v.onended=null});cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false},470)};
   $('close').addEventListener('click',e=>{e.stopPropagation();if(!busy)closeCam()});
@@ -228,7 +233,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   let sy=null,swiped=false;
   cam.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;swiped=false},{passive:true});
   cam.addEventListener('touchmove',e=>{if(sy!==null&&e.touches[0].clientY-sy>70&&!swiped&&!busy){swiped=true;closeCam()}},{passive:true});
-  cam.addEventListener('click',()=>{if(swiped){swiped=false;return}if(busy||!cur||talkRoom)return;if(curLights){if(lit)closeCam();return}const pv=vids[cur[part].v];if(pv&&!pv.ended)return;if(part<cur.length-1)playPart(part+1);else closeCam()});
+  cam.addEventListener('click',()=>{if(swiped){swiped=false;return}if(busy||!cur||talkRoom)return;if(curLights||cur[part].onLights){if(lit)closeCam();return}const pv=vids[cur[part].v];if(pv&&!pv.ended)return;if(part<cur.length-1)playPart(part+1);else closeCam()});
 
   const offlineMsg=(tile,name)=>{flashTile(tile);$('msgtxt').textContent=name+': No Response';msg.querySelector('.spin').style.display='none';msg.style.display='flex';setTimeout(()=>{msg.style.display='none';msg.querySelector('.spin').style.display=''},2200)};
   const reconnecting=(tile,name)=>{flashTile(tile);$('msgtxt').textContent=name+' camera: Reconnecting...';msg.style.display='flex';setTimeout(()=>msg.style.display='none',2200)};
