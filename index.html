@@ -217,7 +217,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   };
   const offline=new Set();
   const setOffline=(id,on)=>{const t=$(id);if(!t)return;t.classList.toggle('off',on);on?offline.add(id):offline.delete(id)};
-  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part!==i)return;if(curRoom==='fd'&&i===cur.length-1)fdDone=true;if(c.idle)playSrc(c.idle,true);};v.ontimeupdate=()=>{if(curRoom&&ROOMS[curRoom].goesOffline&&v.currentTime>14.6){setOffline(curRoom,true);$('lightsbar').classList.remove('show');$('camtop').querySelector('.pill').style.visibility='hidden'}};playSrc(c.v,!!c.loop)};
+  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part!==i)return;if(curRoom==='fd'&&i===cur.length-1){fdDone=true;clearTimeout(litT);litT=setTimeout(()=>{if(cam.style.display==='block'&&!busy)closeCam()},1500)}if(c.idle)playSrc(c.idle,true);};v.ontimeupdate=()=>{if(curRoom&&ROOMS[curRoom].goesOffline&&v.currentTime>14.6){setOffline(curRoom,true);$('lightsbar').classList.remove('show');$('camtop').querySelector('.pill').style.visibility='hidden'}};playSrc(c.v,!!c.loop)};
   /* LIGHTS: click sound, flash, room lit up with the elf caught frozen */
   const click=()=>{const a=audio();if(!a)return;const t=a.currentTime;const b=a.createBuffer(1,a.sampleRate*.04,a.sampleRate),d=b.getChannelData(0);for(let k=0;k<d.length;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/d.length,6);const s=a.createBufferSource(),g=a.createGain();g.gain.value=.9;s.buffer=b;s.connect(g).connect(a.destination);s.start(t)};
   let litT=null;
@@ -228,7 +228,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     if(!curLights){click();return}
     lit=true;click();Object.values(vids).forEach(v=>{v.pause();v.onended=null});showLit();autoClose(3000);$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on'});
   $('lightsbar').addEventListener('click',e=>e.stopPropagation());
-  const closeCam=()=>{if(cam.style.display!=='block')return;clearTimeout(litT);busy=true;$('lightsimg').classList.remove('on');lit=false;['close','camtop','talkbar','lightsbar'].forEach(id=>$(id).classList.remove('show'));Object.values(vids).forEach(v=>{v.pause();v.onended=null});cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false;if(curRoom==='fd'&&fdDone&&!unlocked){fdDone=false;setTimeout(()=>setDoor(true),1500)}},470)};
+  const closeCam=()=>{if(cam.style.display!=='block')return;clearTimeout(litT);busy=true;$('lightsimg').classList.remove('on');lit=false;['close','camtop','talkbar','lightsbar'].forEach(id=>$(id).classList.remove('show'));Object.values(vids).forEach(v=>{v.pause();v.onended=null});cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false;},470)};
   $('close').addEventListener('click',e=>{e.stopPropagation();if(!busy)closeCam()});
 
   /* ---- Talk button: hold while speaking, let go to play the next part (quick taps are ignored) ---- */
