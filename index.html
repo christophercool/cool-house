@@ -178,8 +178,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 
   /* ---- secret controls on the title: tap = new alert, hold = 99+ finale ---- */
   let holdT=null,held=false;const title=$('title');
-  title.addEventListener('pointerdown',()=>{audio();wake();held=false;prime([{v:'__none__'},...FINALE.clips]);holdT=setTimeout(()=>{held=true;finale()},700)});
-  title.addEventListener('pointerup',()=>{clearTimeout(holdT);if(!held)alertNew()});
+  title.addEventListener('pointerdown',()=>{audio();wake();held=false;holdT=setTimeout(()=>{held=true;finale()},700)});
+  title.addEventListener('pointerup',()=>{clearTimeout(holdT);if(!held)alertNew();else unlockLoud(FINALE.clips)});
   title.addEventListener('pointerleave',()=>clearTimeout(holdT));
   /* hold Home 1.5s = reset badge to 1 */
   let rT=null;$('homebtn').addEventListener('pointerdown',()=>{rT=setTimeout(()=>{setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));flashTile($('homebtn'))},1500)});
@@ -189,16 +189,19 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const flashTile=el=>{el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')};
   const tileXf=el=>{const sr=stage.getBoundingClientRect(),tr=el.getBoundingClientRect();return `translate(${tr.left-sr.left}px,${tr.top-sr.top}px) scale(${tr.width/sr.width},${tr.height/sr.height})`};
   /* iPhone only allows sound after a tap, so on opening a camera, quietly unlock every clip in that room */
+  /* iPhone: a video may only play with sound later if it was started with sound inside a tap; start each quietly-paused */
+  const unlockLoud=clips=>clips.flatMap(c=>[c.v,c.idle,c.onLights]).filter(Boolean).forEach(src=>{const v=vids[src];if(!v||!v.paused)return;v.muted=false;const stop=()=>{v.removeEventListener('playing',stop);if(!v.classList.contains('on')){v.pause();try{v.currentTime=0}catch(e){}}};v.addEventListener('playing',stop);const p=v.play();if(p&&p.catch)p.catch(()=>{})});
   const prime=clips=>clips.flatMap(c=>[c.v,c.idle,c.onLights].filter(Boolean)).slice(1).forEach(src=>{const v=vids[src];if(!v)return;const p=(v.muted=true,v.play());const back=()=>{v.pause();try{v.currentTime=0}catch(e){}v.muted=false};if(p&&p.then)p.then(back).catch(()=>{v.muted=false});else back()});
   const openCam=(tile,clips,talk,name,lights)=>{
     if(busy)return;busy=true;audio();wake();flashTile(tile);
     curLights=lights||null;lit=false;$('lightsbtn').classList.remove('lit');$('lightslbl').textContent='Turn on lights';$('lightsimg').classList.remove('on');$('lightsbar').classList.remove('show');if(curLights)$('lightsimg').src=curLights;
     cur=clips;curTile=tile;talkRoom=!!talk;curRoom=tile.id;$('camname').textContent=name||'';
     Object.values(vids).forEach(v=>{v.pause();v.onended=null;v.classList.remove('on')});
-    prime(clips);
+    unlockLoud(clips.map((c,k)=>k?c:Object.assign({},c,{v:null})));
     const first=vids[clips[0].v];first.currentTime=0;first.classList.add('on');
     cam.classList.remove('zoom');cam.style.display='block';cam.style.transform=tileXf(tile);cam.style.borderRadius='6%';
     requestAnimationFrame(()=>requestAnimationFrame(()=>{cam.classList.add('zoom');cam.style.transform='none';cam.style.borderRadius='0'}));
+    $('camtop').querySelector('.pill').style.visibility='';
     setTimeout(()=>{playPart(0);busy=false;$('close').classList.add('show');$('camtop').classList.add('show');$('talkbar').classList.toggle('show',talkRoom);$('lightsbar').classList.toggle('show',!talkRoom)},470);
   };
   /* show a video only once it is actually playing, so there is never a black flash */
@@ -210,12 +213,12 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   };
   const offline=new Set();
   const setOffline=(id,on)=>{const t=$(id);if(!t)return;t.classList.toggle('off',on);on?offline.add(id):offline.delete(id)};
-  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part!==i)return;if(c.idle)playSrc(c.idle,true);};v.ontimeupdate=()=>{if(curRoom&&ROOMS[curRoom].goesOffline&&v.currentTime>14.6){setOffline(curRoom,true);$('lightsbar').classList.remove('show')}};playSrc(c.v,!!c.loop)};
+  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part!==i)return;if(c.idle)playSrc(c.idle,true);};v.ontimeupdate=()=>{if(curRoom&&ROOMS[curRoom].goesOffline&&v.currentTime>14.6){setOffline(curRoom,true);$('lightsbar').classList.remove('show');$('camtop').querySelector('.pill').style.visibility='hidden'}};playSrc(c.v,!!c.loop)};
   /* LIGHTS: click sound, flash, room lit up with the elf caught frozen */
   const click=()=>{const a=audio();if(!a)return;const t=a.currentTime;const b=a.createBuffer(1,a.sampleRate*.04,a.sampleRate),d=b.getChannelData(0);for(let k=0;k<d.length;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/d.length,6);const s=a.createBufferSource(),g=a.createGain();g.gain.value=.9;s.buffer=b;s.connect(g).connect(a.destination);s.start(t)};
   const showLit=()=>{const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');$('lightsimg').classList.add('on')};
   $('lightsbtn').addEventListener('click',e=>{e.stopPropagation();if(lit||busy||!cur)return;const c=cur[part];
-    if(c&&c.onLights){lit=true;click();$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on';Object.values(vids).forEach(v=>v.onended=null);const fz=vids[c.onLights];fz.onended=()=>{if(curLights)showLit()};playSrc(c.onLights,false);return}
+    if(c&&c.onLights){lit=true;$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on';Object.values(vids).forEach(v=>v.onended=null);if(curLights)showLit();playSrc(c.onLights,false);return}
     if(!curLights){click();return}
     lit=true;click();Object.values(vids).forEach(v=>{v.pause();v.onended=null});showLit();$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on'});
   $('lightsbar').addEventListener('click',e=>e.stopPropagation());
