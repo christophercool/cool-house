@@ -148,7 +148,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     of:{name:'Office',     clips:['of1.mp4'], goesOffline:true}               // moustache on Christopher's photo, pulls the plug, CAMERA OFFLINE
   };
   /* finale: plays after the 99+ count, zooming out of this tile */
-  const FINALE={tile:'lr', lights:null, // add 'fin_lights.jpg' when ready
+  const FINALE={tile:'lr', lights:'fin_lights.jpg',
     clips:[{v:'fin_dance.mp4', loop:true, onLights:'fin_freeze.mp4'}]}; // dance loops until Lights: record scratch + freeze
 
   const $=id=>document.getElementById(id);
