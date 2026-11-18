@@ -83,10 +83,12 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 #lightsbtn svg{width:5vh;height:5vh}
 #lightslbl{color:#fff;font-weight:700;font-size:2vh;text-shadow:0 1px 6px #000;min-height:2.6vh}
 .tile.off img{opacity:0}.tile.off{background:#000}
-.tile.off .pill{background:#3a3f47}.tile.off .pill i{display:none;animation:none}
-.tile .offtxt{display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:.8vh;color:#9aa3ad;font-weight:700;font-size:clamp(13px,1.8vh,18px);z-index:1}
+.tile.off .pill,.tile.off>span{display:none}.tile.off::after{display:none}
+.tile .offtxt{display:none;position:absolute;inset:0;padding:1.6vh 3.4vw;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:.2vh;background:linear-gradient(145deg,#2b2f35,#1c1f24);color:#fff;z-index:1}
+.tile .offtxt .nrname{font-size:clamp(16px,2.3vh,24px);font-weight:800;position:static}
+.tile .offtxt .nr{position:static;font-size:clamp(14px,2vh,21px);font-weight:500;color:#9aa3ad;text-shadow:none;left:auto;bottom:auto}
 .tile.off .offtxt{display:flex}
-.tile .offtxt svg{width:4vh;height:4vh}
+.tile .offtxt svg{width:5vh;height:5vh;color:#9aa3ad;margin-bottom:auto}
 #msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2.5vh;background:rgba(13,15,18,.95);color:#fff;font-weight:700;font-size:2.4vh;text-align:center;z-index:9}
 #msg .spin{width:6vh;height:6vh;border-radius:50%;border:.7vh solid rgba(255,255,255,.2);border-top-color:#fff;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -108,7 +110,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
       <div class="tile" id="fd"><img src="tile_fd.jpg" alt=""><div class="pill"><i></i>LIVE</div><span>Front Door</span></div>
       <div class="tile" id="ki"><img src="tile_ki.jpg" alt=""><div class="pill"><i></i>LIVE</div><span>Kitchen</span></div>
       <div class="tile" id="lr"><img src="tile_lr.jpg" alt=""><div class="pill"><i></i>LIVE</div><span>Living Room</span></div>
-      <div class="tile" id="of"><img src="tile_of.jpg" alt=""><div class="pill"><i></i><b class="pt">LIVE</b></div><div class="offtxt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l18 18M15 10l5-3v10l-2-1.2M13 17H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1m4 0h3a2 2 0 0 1 2 2v3"/></svg>Camera offline</div><span>Office</span></div>
+      <div class="tile" id="of"><img src="tile_of.jpg" alt=""><div class="pill"><i></i><b class="pt">LIVE</b></div><div class="offtxt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l18 18M15 10l5-3v10l-2-1.2M13 17H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1m4 0h3a2 2 0 0 1 2 2v3"/></svg><b class="nrname">Office</b><span class="nr">No Response</span></div><span>Office</span></div>
     </div>
     <nav id="tabs">
       <div class="tab on" id="homebtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</div>
@@ -196,7 +198,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     const first=vids[clips[0].v];first.currentTime=0;first.classList.add('on');
     cam.classList.remove('zoom');cam.style.display='block';cam.style.transform=tileXf(tile);cam.style.borderRadius='6%';
     requestAnimationFrame(()=>requestAnimationFrame(()=>{cam.classList.add('zoom');cam.style.transform='none';cam.style.borderRadius='0'}));
-    setTimeout(()=>{playPart(0);busy=false;$('close').classList.add('show');$('camtop').classList.add('show');$('talkbar').classList.toggle('show',talkRoom);$('lightsbar').classList.toggle('show',!!curLights)},470);
+    setTimeout(()=>{playPart(0);busy=false;$('close').classList.add('show');$('camtop').classList.add('show');$('talkbar').classList.toggle('show',talkRoom);$('lightsbar').classList.toggle('show',!talkRoom)},470);
   };
   /* show a video only once it is actually playing, so there is never a black flash */
   const playSrc=(src,loop)=>{
@@ -206,11 +208,11 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     const p=v.play();if(p&&p.catch)p.catch(()=>{v.muted=true;const p2=v.play();if(p2&&p2.catch)p2.catch(()=>v.removeEventListener('playing',swap))});
   };
   const offline=new Set();
-  const setOffline=(id,on)=>{const t=$(id);if(!t)return;t.classList.toggle('off',on);const pt=t.querySelector('.pt');if(pt)pt.textContent=on?'OFFLINE':'LIVE';on?offline.add(id):offline.delete(id)};
-  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part!==i)return;if(c.idle)playSrc(c.idle,true);};v.ontimeupdate=()=>{if(curRoom&&ROOMS[curRoom].goesOffline&&v.currentTime>14.6)setOffline(curRoom,true)};playSrc(c.v,false)};
+  const setOffline=(id,on)=>{const t=$(id);if(!t)return;t.classList.toggle('off',on);on?offline.add(id):offline.delete(id)};
+  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part!==i)return;if(c.idle)playSrc(c.idle,true);};v.ontimeupdate=()=>{if(curRoom&&ROOMS[curRoom].goesOffline&&v.currentTime>14.6){setOffline(curRoom,true);$('lightsbar').classList.remove('show')}};playSrc(c.v,false)};
   /* LIGHTS: click sound, flash, room lit up with the elf caught frozen */
   const click=()=>{const a=audio();if(!a)return;const t=a.currentTime;const b=a.createBuffer(1,a.sampleRate*.04,a.sampleRate),d=b.getChannelData(0);for(let k=0;k<d.length;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/d.length,6);const s=a.createBufferSource(),g=a.createGain();g.gain.value=.9;s.buffer=b;s.connect(g).connect(a.destination);s.start(t)};
-  $('lightsbtn').addEventListener('click',e=>{e.stopPropagation();if(lit||busy)return;lit=true;click();Object.values(vids).forEach(v=>{v.pause();v.onended=null});const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');$('lightsimg').classList.add('on');$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on'});
+  $('lightsbtn').addEventListener('click',e=>{e.stopPropagation();if(lit||busy)return;if(!curLights){click();return}lit=true;click();Object.values(vids).forEach(v=>{v.pause();v.onended=null});const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');$('lightsimg').classList.add('on');$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on'});
   $('lightsbar').addEventListener('click',e=>e.stopPropagation());
   const closeCam=()=>{if(cam.style.display!=='block')return;busy=true;$('lightsimg').classList.remove('on');lit=false;['close','camtop','talkbar','lightsbar'].forEach(id=>$(id).classList.remove('show'));Object.values(vids).forEach(v=>{v.pause();v.onended=null});cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false},470)};
   $('close').addEventListener('click',e=>{e.stopPropagation();if(!busy)closeCam()});
@@ -228,7 +230,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   cam.addEventListener('touchmove',e=>{if(sy!==null&&e.touches[0].clientY-sy>70&&!swiped&&!busy){swiped=true;closeCam()}},{passive:true});
   cam.addEventListener('click',()=>{if(swiped){swiped=false;return}if(busy||!cur||talkRoom)return;if(curLights){if(lit)closeCam();return}const pv=vids[cur[part].v];if(pv&&!pv.ended)return;if(part<cur.length-1)playPart(part+1);else closeCam()});
 
-  const offlineMsg=(tile,name)=>{flashTile(tile);$('msgtxt').textContent=name+' camera is offline';msg.querySelector('.spin').style.display='none';msg.style.display='flex';setTimeout(()=>{msg.style.display='none';msg.querySelector('.spin').style.display=''},2200)};
+  const offlineMsg=(tile,name)=>{flashTile(tile);$('msgtxt').textContent=name+': No Response';msg.querySelector('.spin').style.display='none';msg.style.display='flex';setTimeout(()=>{msg.style.display='none';msg.querySelector('.spin').style.display=''},2200)};
   const reconnecting=(tile,name)=>{flashTile(tile);$('msgtxt').textContent=name+' camera: Reconnecting...';msg.style.display='flex';setTimeout(()=>msg.style.display='none',2200)};
   Object.entries(ROOMS).forEach(([id,r])=>{const t=$(id);t.addEventListener('click',()=>offline.has(id)?offlineMsg(t,r.name):r.clips.length?openCam(t,r.clips,r.talk,r.name,r.lights):reconnecting(t,r.name))});
   msg.addEventListener('click',()=>msg.style.display='none');
