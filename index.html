@@ -731,7 +731,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const clRing=()=>{if(!call.classList.contains('hide'))return;try{ring.currentTime=0;const p=ring.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}clearInterval(clT);call.classList.remove('live','ended');call.querySelectorAll('.cl-g.on').forEach(g=>g.classList.remove('on'));kdx=0;knob.classList.remove('back');knob.style.transform='';$('cl-stx').style.opacity='';call.classList.remove('hide')};
   const clRecent=missed=>{clN++;const l=$('ph-rlist'),old=l.querySelector('.ph-santa');if(old)old.remove();
     l.insertAdjacentHTML('afterbegin',`<div class="ph-rc ph-santa${missed?' ph-miss':''}"${missed?' data-ph="vm"':''}><div class="ph-av" style="background:#7a1c1c url(santa.jpg) 30% 18%/260% auto"></div><div class="ph-mid"><div class="ph-txt"><div class="ph-nm">Santa Claus${clN>1?' ('+clN+')':''}</div><div class="ph-st">${IN} North Pole</div></div><span class="ph-wh">now</span><span class="ph-i">i</span></div></div>`)};
-  const clHide=()=>{ringStop();outStop();clearInterval(clT);call.classList.add('hide');setTimeout(()=>call.classList.remove('live','ended'),320);if(outCall){outCall=false;afterOut()}else lockShow()};
+  const clHide=()=>{ringStop();outStop();clearInterval(clT);call.classList.add('hide');setTimeout(()=>call.classList.remove('live','ended'),320);if(outCall){outCall=false;if(outAns)outAns=false;else afterOut()}else lockShow()};
   const clAnswer=()=>{ringStop();audio();click();clS=0;$('cl-time').textContent='0:00';call.classList.add('live');clRecent(false);
     clT=setInterval(()=>{clS++;$('cl-time').textContent=Math.floor(clS/60)+':'+String(clS%60).padStart(2,'0')},1000)};
   /* slide to answer: drag the green knob to the right end */
@@ -788,20 +788,23 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   $('ms-home').addEventListener('click',e=>{e.stopPropagation();lockShow();setTimeout(()=>$('ms').classList.add('hide'),380)});
   /* ===== CALL SANTA (daycares, no Santa visit) =====
      Swipe up to unlock -> Phone (dock) opens on Favourites -> tap "Santa Claus".
-     Calling... ring-ring, then Santa's ELF answers (voicemail greeting, santa_greet.mp3), then the jingle beep. Kids yell their message; tap red to hang up.
+     Calling... ring-ring (tap Santa's photo/name while ringing = Santa picks up, silent call), otherwise Santa's ELF answers (voicemail greeting, santa_greet.mp3), then the jingle beep. Kids yell their message; tap red to hang up.
      5s later Santa texts back (banner). Tap it = Messages; tap Santa's photo at the top = next reply (typing dots first). */
   const FAVS=[['Mommy ❤️','mobile','M','#ff8fb1,#e0567f'],['Mrs. Claus','North Pole','MC','#d62b2b,#9e1414'],['Santa Claus','sleigh phone','','',1],['Head Elf','Toy Workshop','HE','#34c759,#1f8f3c'],['The Tooth Fairy','pillow line','TF','#64d2ff,#2a9fd6'],['Wife','home','W','#c084fc,#8b4fd6'],['Frosty Snowman','freezer','FS','#9ad8ff,#58aee0'],['Pineapple Pizza Hotline','work','PP','#ffb340,#f07a00'],['Grandma','home','G','#ff9f0a,#c76f00'],['Easter Bunny','off-season','EB','#bf9cff,#8a63e0'],['Moose (Canadian)','mobile','MO','#8b6b4a,#5c432b']];
   $('ph-flist').innerHTML=FAVS.map(([n,sub,a,c,sa])=>`<div class="ph-rc ph-fav"${sa?' id="fav-santa"':''}><div class="ph-av" style="background:${sa?'#7a1c1c url(santa.jpg) 30% 18%/260% auto':'linear-gradient('+c+')'}">${a}</div><div class="ph-mid"><div class="ph-txt"><div class="ph-nm">${n}</div><div class="ph-st"><svg viewBox="0 0 24 24" fill="#8a8a8e" style="width:1.6cqh;height:1.6cqh;vertical-align:-.2cqh"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg> ${sub}</div></div><span class="ph-fi">i</span></div></div>`).join('');
-  const out=$('cl-out');let outCall=false,outStage=0,outT=null;
+  const out=$('cl-out');let outCall=false,outStage=0,outT=null,outAns=false;
   out.addEventListener('error',()=>{if(outStage===2){outStage=3;outPlay('vm_beep.mp3');out.onended=null}});
   const outPlay=src=>{out.src=blobs[src]||src;try{out.currentTime=0}catch(e){}const p=out.play();if(p&&p.catch)p.catch(()=>{})};
   function outStop(){outStage=0;clearTimeout(outT);try{out.pause()}catch(e){}out.onended=null}
   const REPLIES=["HO HO HO!! My elf said you called! Was that YOU guys?? That was the LOUDEST Merry Christmas EVER! 🎅","Hold on, I'm checking my list... 📜","...EVERYONE in this room is on the NICE list!! ✅🎉","PS: Did my elf eat my cookies AGAIN?? 🍪😂"];
   let rpN=0,rpOn=false;
   $('fav-santa').addEventListener('click',e=>{e.stopPropagation();if(!call.classList.contains('hide'))return;audio();wake();
-    outCall=true;outStage=1;call.querySelectorAll('.cl-g.on').forEach(g=>g.classList.remove('on'));call.classList.remove('ended');call.classList.add('live');$('cl-time').textContent='calling...';call.classList.remove('hide');clRecentOut();
+    outCall=true;outAns=false;outStage=1;call.querySelectorAll('.cl-g.on').forEach(g=>g.classList.remove('on'));call.classList.remove('ended');call.classList.add('live');$('cl-time').textContent='calling...';call.classList.remove('hide');clRecentOut();
     outPlay('ringback.mp3');out.onended=()=>{if(outStage!==1)return;outStage=2;clS=0;$('cl-time').textContent='0:00';clearInterval(clT);clT=setInterval(()=>{clS++;$('cl-time').textContent=Math.floor(clS/60)+':'+String(clS%60).padStart(2,'0')},1000);
       outPlay('santa_greet.mp3');out.onended=()=>{if(outStage!==2)return;outStage=3;outPlay('vm_beep.mp3');out.onended=null}}});
+  /* secret: tap Santa's photo or name WHILE IT'S RINGING = Santa picks up (silent call, timer runs). Don't tap = elf voicemail. */
+  call.querySelector('.cl-live .cl-top').addEventListener('click',e=>{e.stopPropagation();if(!outCall||outStage!==1)return;outStop();outAns=true;outStage=5;click();
+    clS=0;$('cl-time').textContent='0:00';clearInterval(clT);clT=setInterval(()=>{clS++;$('cl-time').textContent=Math.floor(clS/60)+':'+String(clS%60).padStart(2,'0')},1000)});
   const clRecentOut=()=>{const l=$('ph-rlist'),old=l.querySelector('.ph-santa');if(old)old.remove();
     l.insertAdjacentHTML('afterbegin',`<div class="ph-rc ph-santa"><div class="ph-av" style="background:#7a1c1c url(santa.jpg) 30% 18%/260% auto"></div><div class="ph-mid"><div class="ph-txt"><div class="ph-nm">Santa Claus</div><div class="ph-st">${OUT} sleigh phone</div></div><span class="ph-wh">now</span><span class="ph-i">i</span></div></div>`)};
   /* after hanging up: back in the Phone app, Santa texts back 5s later */
