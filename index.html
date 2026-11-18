@@ -186,6 +186,57 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 #msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2.5cqh;background:rgba(13,15,18,.95);color:#fff;font-weight:700;font-size:2.4cqh;text-align:center;z-index:9}
 #msg .spin{width:6cqh;height:6cqh;border-radius:50%;border:.7cqh solid rgba(255,255,255,.2);border-top-color:#fff;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---- Phone app (Mrs. Claus voicemail), iOS 26 light ---- */
+.ln>.phic{width:5.6cqh;height:5.6cqh;border-radius:1.3cqh;flex:none;display:grid;place-items:center;background:linear-gradient(#5ff07a,#2bc44c)}
+.ln>.phic svg{width:62%;height:62%}
+#lk-date{cursor:pointer;padding:.6cqh 4cqw}
+#ph{position:absolute;inset:0;z-index:13;background:#fff;color:#000;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;transition:opacity .3s,transform .35s cubic-bezier(.2,.8,.2,1)}
+#ph.hide{opacity:0;transform:scale(.94);pointer-events:none}
+.ph-scr{position:absolute;inset:0;display:none;flex-direction:column;padding-top:5.5cqh}
+.ph-scr.on{display:flex}
+.ph-bar{display:flex;justify-content:space-between;align-items:center;padding:0 4cqw;gap:2cqw}
+.ph-btn{height:5.4cqh;padding:0 4.5cqw;border-radius:3cqh;background:#fff;border:1px solid #e6e6ea;box-shadow:0 .5cqh 1.6cqh #0000000f;display:grid;place-items:center;font-size:clamp(15px,2.1cqh,21px);white-space:nowrap}
+.ph-seg{display:flex;padding:.5cqh;border-radius:3cqh;border:1px solid #e6e6ea;box-shadow:0 .5cqh 1.6cqh #0000000f;font-size:clamp(15px,2.1cqh,21px)}
+.ph-seg span{padding:1cqh 4cqw;border-radius:2.6cqh}.ph-seg .on{background:#e9e9ec}
+.ph-rnd{width:5.4cqh;padding:0}
+.ph-h1{font-size:clamp(32px,4.6cqh,48px);font-weight:800;padding:1.4cqh 4cqw 1cqh}
+.ph-search{margin:0 4cqw 1cqh;height:5cqh;border-radius:2.5cqh;background:#f0f0f2;display:flex;align-items:center;gap:2cqw;padding:0 3.5cqw;color:#8a8a8e;font-size:clamp(15px,2.1cqh,21px)}
+.ph-list{flex:1;overflow:auto;padding:0 4cqw 14cqh;-webkit-overflow-scrolling:touch}
+.ph-rc{display:flex;align-items:center;gap:3cqw}
+.ph-av{flex:none;width:6.4cqh;height:6.4cqh;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:2.3cqh}
+.ph-mid{flex:1;min-width:0;display:flex;align-items:center;gap:2cqw;border-bottom:1px solid #e3e3e6;min-height:9cqh;padding:1cqh 0}
+.ph-txt{flex:1;min-width:0}
+.ph-nm{font-weight:600;font-size:clamp(16px,2.35cqh,24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph-miss .ph-nm{color:#ff3b30}
+.ph-st{color:#8a8a8e;font-size:clamp(13px,1.95cqh,20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph-st svg{width:1.5cqh;height:1.5cqh;vertical-align:-.1cqh}
+.ph-wh{color:#8a8a8e;font-size:clamp(13px,1.95cqh,20px);white-space:nowrap}
+.ph-i{flex:none;width:5cqh;height:5cqh;border-radius:50%;background:#f0f0f2;color:#0a7aff;display:grid;place-items:center;font:600 2.5cqh Georgia,serif;font-style:italic}
+.ph-vr{border-bottom:1px solid #e3e3e6;padding:1.6cqh 0 1.6cqh 5cqw;position:relative}
+.ph-vr .dot{position:absolute;left:.4cqw;top:2.6cqh;width:1.3cqh;height:1.3cqh;border-radius:50%;background:#0a7aff}
+.ph-vr.heard .dot{visibility:hidden}
+.ph-top{display:flex;justify-content:space-between;gap:2cqw}
+.ph-pl{display:none;padding-top:1cqh}.ph-vr.open .ph-pl{display:block}
+.ph-prog{position:relative;height:.55cqh;border-radius:.3cqh;background:#d8d8dc;margin:2cqh 0 .8cqh;touch-action:none}
+.ph-prog i{position:absolute;inset:0 auto 0 0;width:0;background:#000;border-radius:.3cqh}
+.ph-prog s{position:absolute;top:50%;width:2cqh;height:2cqh;margin:-1cqh 0 0 -1cqh;border-radius:50%;background:#fff;box-shadow:0 1px 4px #0005;left:0}
+.ph-times{display:flex;justify-content:space-between;color:#8a8a8e;font-size:clamp(12px,1.7cqh,17px);font-variant-numeric:tabular-nums}
+.ph-ctrl{display:flex;align-items:center;gap:3.5cqw;margin-top:1.6cqh;font-size:clamp(14px,1.95cqh,20px)}
+.ph-play{width:6.2cqh;height:6.2cqh;border-radius:50%;background:#0a7aff;display:grid;place-items:center;cursor:pointer}
+.ph-play svg{width:45%;height:45%}
+.ph-ctrl .l{color:#0a7aff}.ph-ctrl .d{margin-left:auto;color:#ff3b30}
+.ph-tr{margin-top:1.8cqh;background:#f0f0f2;border-radius:1.8cqh;padding:1.6cqh 3.5cqw;font-size:clamp(14px,1.95cqh,20px);color:#333;line-height:1.35}
+.ph-tr b{display:block;color:#8a8a8e;font-size:clamp(12px,1.7cqh,17px);font-weight:500;margin-bottom:.4cqh}
+.ph-del{display:flex;justify-content:space-between;padding:2.2cqh 0;border-bottom:1px solid #e3e3e6;font-size:clamp(16px,2.3cqh,23px)}.ph-del span{color:#8a8a8e}
+#ph-tabs{position:absolute;left:3cqw;right:3cqw;bottom:4cqh;display:flex;justify-content:space-around;align-items:center;height:9.4cqh;border-radius:4.7cqh;background:#ffffffe8;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid #e6e6ea;box-shadow:0 .8cqh 3cqh #0000001f;padding:0 1.4cqw;font-size:clamp(11px,1.5cqh,15px);font-weight:500;color:#000}
+#ph-tabs div{flex:1;display:grid;justify-items:center;gap:.3cqh;padding:1cqh 0;border-radius:4cqh}
+#ph-tabs svg{height:3.3cqh;width:auto}
+#ph-tabs .on{color:#0a7aff;background:#ececef}
+.ph-bdg{position:relative}.ph-bdg::after{content:"";position:absolute;top:-.8cqh;right:-1.4cqh;width:2.3cqh;height:2.3cqh;border-radius:50%;background:#ff3b30}
+#ph-tabs.heard .ph-bdg::after{display:none}
+#ph-home{position:absolute;left:30%;right:30%;bottom:0;height:3.2cqh;display:flex;align-items:flex-end;padding-bottom:.8cqh;cursor:pointer}
+#ph-home i{display:block;width:100%;height:.6cqh;border-radius:1cqh;background:#000}
 @media (prefers-reduced-motion:reduce){#cam.zoom{transition:none}}
 </style>
 </head>
@@ -228,6 +279,42 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     <div id="sp-wid"><div class="wd" id="sp-wd"></div><div class="wt" id="sp-wt"></div></div>
     <div id="sp-grid"><div class="app"><div class="ai" style="background:linear-gradient(#d7d9de,#9a9da4)"><svg viewBox="0 0 24 24" fill="#333"><path d="M9 4l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.5L15 4zm3 4.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9z"/></svg></div><span>Camera</span></div><div class="app"><div class="ai" style="background:linear-gradient(#4aa8ff,#1f6fe0)"><svg viewBox="0 0 24 24"><circle cx="9" cy="9" r="4" fill="#ffd23f"/><path d="M8 19a4 4 0 0 1 .4-8 5 5 0 0 1 9.4 1.6A3.2 3.2 0 0 1 17.5 19z" fill="#fff"/></svg></div><span>Weather</span></div><div class="app"><div class="ai" style="background:#fff"><svg viewBox="0 0 24 24"><text x="12" y="9" text-anchor="middle" font-size="5.5" font-weight="700" fill="#ff3b30" font-family="-apple-system,sans-serif" id="calw">TUE</text><text x="12" y="21" text-anchor="middle" font-size="12" font-weight="400" fill="#111" font-family="-apple-system,sans-serif" id="cald">17</text></svg></div><span>Calendar</span></div><div class="app"><div class="ai" style="background:#111"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#fff"/><path d="M12 6v6l4 2" stroke="#111" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg></div><span>Clock</span></div><div class="app"><div class="ai" style="background:linear-gradient(#fff 30%,#ffe26a 30%)"><svg viewBox="0 0 24 24"><path d="M5 12h14M5 16h14M5 20h10" stroke="#c9c9c9" stroke-width="1.4"/></svg></div><span>Notes</span></div><div class="app"><div class="ai" style="background:#fff"><svg viewBox="0 0 24 24"><g transform="translate(12 12)"><ellipse rx="3" ry="6" cy="-4" fill="#ff9f0a" opacity=".9"/><ellipse rx="3" ry="6" cy="-4" fill="#ffd60a" opacity=".9" transform="rotate(45)"/><ellipse rx="3" ry="6" cy="-4" fill="#30d158" opacity=".9" transform="rotate(90)"/><ellipse rx="3" ry="6" cy="-4" fill="#64d2ff" opacity=".9" transform="rotate(135)"/><ellipse rx="3" ry="6" cy="-4" fill="#0a84ff" opacity=".9" transform="rotate(180)"/><ellipse rx="3" ry="6" cy="-4" fill="#bf5af2" opacity=".9" transform="rotate(225)"/><ellipse rx="3" ry="6" cy="-4" fill="#ff375f" opacity=".9" transform="rotate(270)"/><ellipse rx="3" ry="6" cy="-4" fill="#ff453a" opacity=".9" transform="rotate(315)"/></g></svg></div><span>Photos</span></div><div class="app"><div class="ai" style="background:linear-gradient(#b8bbc2,#7f838b)"><svg viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></div><span>Settings</span></div><div class="app"><div class="ai" style="background:linear-gradient(135deg,#9be37a,#6cc6ff)"><svg viewBox="0 0 24 24"><path d="M12 2a6 6 0 0 0-6 6c0 4.5 6 12 6 12s6-7.5 6-12a6 6 0 0 0-6-6z" fill="#ff3b30"/><circle cx="12" cy="8" r="2.2" fill="#fff"/></svg></div><span>Maps</span></div><div class="app" id="sp-ch"><div class="ai"><img src="icon.png" alt=""></div><span>Cool House</span></div></div>
     <div id="sp-dock"><div class="app"><div class="ai" style="background:linear-gradient(#5ff07a,#2bc44c)"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></div><span>Phone</span></div><div class="app"><div class="ai" style="background:linear-gradient(#5ff07a,#2bc44c)"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.4 1.3 4.6 3.4 6-.2 1.3-.8 2.6-1.8 3.6 2 0 3.8-.8 5-1.9 1.1.3 2.2.4 3.4.4 5.5 0 10-3.6 10-8s-4.5-8-10-8z"/></svg></div><span>Messages</span></div><div class="app"><div class="ai" style="background:linear-gradient(#ff6b81,#fa2d48)"><svg viewBox="0 0 24 24" fill="#fff"><path d="M9 18V6l11-2v12" stroke="#fff" stroke-width="2" fill="none"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg></div><span>Music</span></div><div class="app" id="sp-ch2"><div class="ai"><img src="icon.png" alt=""></div><span>Cool House</span></div></div>
+  </div>
+  <div id="ph" class="hide">
+    <section class="ph-scr" id="ph-rec">
+      <div class="ph-bar"><span class="ph-btn">Edit</span><span class="ph-seg"><span class="on">All</span><span>Missed</span></span><span class="ph-btn ph-rnd"><svg width="22" height="16" viewBox="0 0 22 16" stroke="#000" stroke-width="2" stroke-linecap="round"><path d="M1 2h20M4 8h14M8 14h6"/></svg></span></div>
+      <div class="ph-h1">Recents</div>
+      <div class="ph-search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.4"><circle cx="10" cy="10" r="7"/><path d="M15 15l6 6"/></svg>Search</div>
+      <div class="ph-list" id="ph-rlist"></div>
+    </section>
+    <section class="ph-scr" id="ph-vm">
+      <div class="ph-bar"><span class="ph-btn">Edit</span><span class="ph-btn">Greeting</span></div>
+      <div class="ph-h1">Voicemail</div>
+      <div class="ph-list">
+        <div class="ph-vr" id="ph-row"><span class="dot"></span>
+          <div class="ph-top"><span class="ph-nm">Mrs. Claus</span><span class="ph-wh" id="ph-when">now</span></div>
+          <div class="ph-st">North Pole</div>
+          <div class="ph-pl">
+            <div class="ph-prog" id="ph-prog"><i id="ph-fill"></i><s id="ph-knob"></s></div>
+            <div class="ph-times"><span id="ph-cur">0:00</span><span id="ph-dur">-0:44</span></div>
+            <div class="ph-ctrl"><div class="ph-play" id="ph-play"><svg id="ph-ico" viewBox="0 0 24 24" fill="#fff"><path d="M7 4l14 8-14 8z"/></svg></div><span class="l">Speaker</span><span class="l">Call Back</span><span class="d">Delete</span></div>
+            <div class="ph-tr"><b>Transcription</b>Hello? Hello?! Is this Christopher Cool? Oh, it's the voicemail. Hello, voicemail! Okay dear, it's Mrs. Claus. Santa LOVES your cookies...</div>
+          </div>
+        </div>
+        <div class="ph-vr heard"><span class="dot"></span><div class="ph-top"><span class="ph-nm">Mommy</span><span class="ph-wh">Yesterday</span></div><div class="ph-st">"Did you wear a sweater?"</div></div>
+        <div class="ph-vr heard"><span class="dot"></span><div class="ph-top"><span class="ph-nm">Dasher</span><span class="ph-wh">Monday</span></div><div class="ph-st">Reindeer Barn</div></div>
+        <div class="ph-del">Deleted Voicemails <span>3 &rsaquo;</span></div>
+      </div>
+    </section>
+    <nav id="ph-tabs">
+      <div><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21l1.4-7L2 9.3l7-.8z"/></svg>Favourites</div>
+      <div data-ph="rec"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M12 6v6h-4" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>Recents</div>
+      <div><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="9.5" r="3.5" fill="#fff"/><path d="M5.5 18.5a7.5 5 0 0 1 13 0" fill="#fff"/></svg>Contacts</div>
+      <div><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="5" r="2.4"/><circle cx="12" cy="5" r="2.4"/><circle cx="19" cy="5" r="2.4"/><circle cx="5" cy="12" r="2.4"/><circle cx="12" cy="12" r="2.4"/><circle cx="19" cy="12" r="2.4"/><circle cx="5" cy="19" r="2.4"/><circle cx="12" cy="19" r="2.4"/><circle cx="19" cy="19" r="2.4"/></svg>Keypad</div>
+      <div data-ph="vm"><span class="ph-bdg"><svg viewBox="0 0 30 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="8" cy="12" r="5"/><circle cx="22" cy="12" r="5"/><path d="M8 17h14"/></svg></span>Voicemail</div>
+    </nav>
+    <div id="ph-home"><i></i></div>
+    <audio id="ph-aud" src="mrs_claus_vm.mp3" preload="auto"></audio>
   </div>
   <div id="ban"></div>
   <div id="lock">
@@ -359,7 +446,9 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 
   /* ===== LOCK SCREEN (dog wallpaper, Face ID, notifications) =====
      Secret controls on the lock screen:
-       tap the clock      = next notification in SEQ order
+       (app opens with NO notification)
+       tap the clock      = next camera notification in SEQ order
+       tap the date       = Mrs. Claus: Missed Call, then a Voicemail notification 3.5s later
        hold the clock     = HomePod plays + 99+ notifications pile up (tap it for the dance party)
        swipe up           = Face ID unlock to the Cool House home screen
        hold flashlight 1.5s = reset everything for the next show
@@ -369,10 +458,9 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const lock=$('lock'),lkList=$('lk-list');
   const tick=()=>{const d=new Date();$('lk-time').textContent=d.getHours()%12||12;$('lk-time').textContent+=':'+String(d.getMinutes()).padStart(2,'0');$('lk-date').textContent=d.toLocaleDateString('en-US',{weekday:'short'})+' '+d.toLocaleDateString('en-US',{month:'short'})+' '+d.getDate()};
   tick();setInterval(tick,5000);
-  setTimeout(()=>{if(seqI===0)nextAlert()},300);
   function lockShow(){lock.classList.remove('hide','scan','open');lkBusy=false}
   const faceId=done=>{if(lkBusy)return;lkBusy=true;lock.classList.add('scan');setTimeout(()=>{lock.classList.remove('scan');lock.classList.add('open');click()},480);setTimeout(()=>{done();lock.classList.add('hide');lkBusy=false},850)};
-  const card=(o,box)=>{const c=document.createElement('div');c.className='ln'+(o.stack?' stack':'');c.innerHTML=`<img class="ic" src="icon.png" alt=""><div class="nt"><div class="ttl">${o.title}</div><div class="nb">${o.body||''}</div>${o.more?'<div class="nm"></div>':''}</div>${o.thumb?`<img class="th" src="${o.thumb}" alt="">`:''}`;(box||lkList).appendChild(c);return c};
+  const card=(o,box)=>{const c=document.createElement('div');c.className='ln'+(o.stack?' stack':'');c.innerHTML=`${o.icon||'<img class="ic" src="icon.png" alt="">'}<div class="nt"><div class="ttl">${o.title}</div><div class="nb">${o.body||''}</div>${o.more?'<div class="nm"></div>':''}</div>${o.thumb?`<img class="th" src="${o.thumb}" alt="">`:''}`;(box||lkList).appendChild(c);return c};
   const clearCards=()=>document.querySelectorAll('#lk-list .ln,#ban .ln').forEach(c=>c.remove());
   const openFromCard=(c,fn)=>{c.addEventListener('click',e=>{e.stopPropagation();if(lkBusy)return;audio();wake();c.classList.add('press');const go=()=>{const r=c.getBoundingClientRect();clearCards();spHide();fn(c,r)};if(isLocked())faceId(go);else{clearTimeout(banT);go()}})};
   const roomFromLock=(id,rect)=>{const r=ROOMS[id];const t=$(id);if(!r.clips.length)return;camOrigin={getBoundingClientRect:()=>rect};openCam(t,r.clips,r.talk,r.name,r.lights)};
@@ -415,7 +503,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   /* hold flashlight = full reset */
   let flT=null;$('lk-flash').addEventListener('pointerdown',e=>{e.stopPropagation();flT=setTimeout(()=>{fullReset();click()},1500)});
   $('lk-flash').addEventListener('pointerup',()=>clearTimeout(flT));
-  function fullReset(){clearTimeout(ofT);seqI=0;finStage=0;finCard=null;spShow();setTimeout(()=>{if(isLocked()&&!lkList.querySelector('.ln'))nextAlert()},50);clearCards();$('lk-np').classList.remove('show');setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));unlocked=false;fdDone=false;setPod(false);$('doors').classList.remove('unlocked');$('doorstxt').textContent='Locked';lockShow()}
+  function fullReset(){clearTimeout(ofT);seqI=0;finStage=0;finCard=null;spShow();clearCards();phReset();$('lk-np').classList.remove('show');setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));unlocked=false;fdDone=false;setPod(false);$('doors').classList.remove('unlocked');$('doorstxt').textContent='Locked';lockShow()}
 
   /* ===== iPhone icon screen =====
      widget clock: tap = next notification banner, hold = finale
@@ -450,6 +538,67 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const reconnecting=(tile,name)=>{flashTile(tile);$('msgtxt').textContent=name+' camera: Reconnecting...';msg.style.display='flex';setTimeout(()=>msg.style.display='none',2200)};
   Object.entries(ROOMS).forEach(([id,r])=>{const t=$(id);t.addEventListener('click',()=>offline.has(id)?offlineMsg(t,r.name):r.clips.length?openCam(t,r.clips,r.talk,r.name,r.lights):reconnecting(t,r.name))});
   msg.addEventListener('click',()=>msg.style.display='none');
+
+  /* ===== PHONE APP: Mrs. Claus missed call + voicemail =====
+     tap the lock-screen date = Missed Call notification, Voicemail notification 3.5s later.
+     Missed Call opens Recents, Voicemail opens Voicemail with Mrs. Claus ready to play.
+     Tap the black bar at the bottom of the Phone app = back to the lock screen. */
+  const PHIC='<div class="phic"><svg viewBox="0 0 24 24" fill="#fff">'+'<path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/>'+'</svg></div>';
+  const VMIC='<div class="phic"><svg viewBox="0 0 30 24" fill="none" stroke="#fff" stroke-width="2.6"><circle cx="8" cy="12" r="5"/><circle cx="22" cy="12" r="5"/><path d="M8 17h14"/></svg></div>';
+  const IN='<svg viewBox="0 0 12 12" stroke="#8a8a8e" stroke-width="1.6" fill="none"><path d="M10 2L2 10M2 4v6h6"/></svg>';
+  const OUT='<svg viewBox="0 0 12 12" stroke="#8a8a8e" stroke-width="1.6" fill="none"><path d="M2 10L10 2M4 2h6v6"/></svg>';
+  /* [name, subtitle, when, missed, avatar, colours, opens voicemail] */
+  const CALLS=[
+    ['Mrs. Claus','North Pole','now',1,'MC','#d62b2b,#9e1414',1],
+    ['Mommy (14)','mobile','9:12 AM',1,'M','#ff8fb1,#e0567f'],
+    ['Wife','"Pick up milk. And eggs. And milk."','8:55 AM',0,'W','#c084fc,#8b4fd6'],
+    ['Mommy','"Did you eat breakfast?"','8:31 AM',0,'M','#ff8fb1,#e0567f'],
+    ['Extra Cheesy Pizza','"Your 9 pizzas are ready"','Yesterday',0,'EC','#ffb340,#f07a00'],
+    ['Dasher','Reindeer Barn','Yesterday',1,'D','#a0522d,#6b3410'],
+    ['Mommy (7)','"Call me back. It is NOT an emergency."','Yesterday',1,'M','#ff8fb1,#e0567f'],
+    ['Pineapple Pizza Hotline','"Are you SURE?"','Yesterday',0,'PP','#ffb340,#f07a00'],
+    ['Head Elf','Toy Workshop','Monday',0,'HE','#34c759,#1f8f3c'],
+    ['Wife','"Who ate the last cookie?"','Monday',1,'W','#c084fc,#8b4fd6'],
+    ['The Tooth Fairy','"Wrong house, sorry"','Monday',0,'TF','#64d2ff,#2a9fd6'],
+    ['Grandma','"How do I make the phone stop?"','Sunday',0,'G','#ff9f0a,#c76f00'],
+    ['Easter Bunny','"Wrong holiday, my bad"','Sunday',1,'EB','#bf9cff,#8a63e0'],
+    ['Probably the Grinch','unknown','Saturday',1,'?','#7cc24a,#3e7d1c'],
+    ['Mommy (22)','mobile','Saturday',1,'M','#ff8fb1,#e0567f'],
+    ['Frosty Snowman','"Too hot, calling from the freezer"','Friday',0,'FS','#9ad8ff,#58aee0'],
+    ['Moose (Canadian)','"Sorry, eh"','Friday',0,'MO','#8b6b4a,#5c432b']
+  ];
+  $('ph-rlist').innerHTML=CALLS.map(([n,s,w,m,a,c,v])=>`<div class="ph-rc${m?' ph-miss':''}"${v?' data-ph="vm"':''}><div class="ph-av" style="background:linear-gradient(${c})">${a}</div><div class="ph-mid"><div class="ph-txt"><div class="ph-nm">${n}</div><div class="ph-st">${m?IN:OUT} ${s}</div></div><span class="ph-wh">${w}</span><span class="ph-i">i</span></div></div>`).join('');
+  const ph=$('ph'),phA=$('ph-aud'),phRow=$('ph-row');
+  const phTab=t=>{$('ph-rec').classList.toggle('on',t==='rec');$('ph-vm').classList.toggle('on',t==='vm');document.querySelectorAll('#ph-tabs [data-ph]').forEach(d=>d.classList.toggle('on',d.dataset.ph===t));if(t==='vm')phRow.classList.add('open')};
+  const phOpen=t=>{phTab(t);ph.classList.remove('hide')};
+  ph.addEventListener('click',e=>{const d=e.target.closest('[data-ph]');if(d){e.stopPropagation();phTab(d.dataset.ph)}});
+  phRow.addEventListener('click',e=>{if(e.target.closest('.ph-pl'))return;phRow.classList.toggle('open')});
+  const phClose=()=>{phA.pause();lockShow();setTimeout(()=>ph.classList.add('hide'),380)};
+  $('ph-home').addEventListener('click',e=>{e.stopPropagation();phClose()});
+  /* player */
+  const pf=x=>{x=Math.max(0,Math.round(x||0));return Math.floor(x/60)+':'+String(x%60).padStart(2,'0')};
+  const PLAY='<path d="M7 4l14 8-14 8z"/>',PAUSE='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
+  const phDraw=()=>{const d=phA.duration||44,c=phA.currentTime||0,p=c/d*100;$('ph-fill').style.width=p+'%';$('ph-knob').style.left=p+'%';$('ph-cur').textContent=pf(c);$('ph-dur').textContent='-'+pf(d-c);$('ph-ico').innerHTML=phA.paused?PLAY:PAUSE};
+  ['timeupdate','loadedmetadata','play','pause','ended'].forEach(k=>phA.addEventListener(k,phDraw));
+  $('ph-play').addEventListener('click',e=>{e.stopPropagation();if(phA.paused){const p=phA.play();if(p&&p.catch)p.catch(()=>{});phRow.classList.add('heard');$('ph-tabs').classList.add('heard')}else phA.pause()});
+  const phSeek=e=>{const r=$('ph-prog').getBoundingClientRect(),d=phA.duration;if(d)phA.currentTime=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width))*d};
+  $('ph-prog').addEventListener('pointerdown',e=>{e.stopPropagation();phSeek(e);const m=ev=>phSeek(ev),u=()=>{removeEventListener('pointermove',m);removeEventListener('pointerup',u)};addEventListener('pointermove',m);addEventListener('pointerup',u)});
+  /* unlock the voicemail audio inside the notification tap so Play works instantly */
+  const phPrime=()=>{try{phA.muted=true;const p=phA.play();const back=()=>{phA.pause();phA.currentTime=0;phA.muted=false;phDraw()};if(p&&p.then)p.then(back).catch(()=>{phA.muted=false});else back()}catch(e){}};
+  /* lock-screen notifications */
+  let mcT=null;
+  const mrsClaus=()=>{if(lkBusy)return;clearCards();clearTimeout(mcT);clearTimeout(ofT);const box=isLocked()?null:$('ban');if(box)banTimer();
+    const c1=card({title:'Missed Call',body:'Mrs. Claus',icon:PHIC},box);ding();
+    c1.addEventListener('pointerdown',phPrime,{once:true});openFromCard(c1,()=>phOpen('rec'));
+    mcT=setTimeout(()=>{if(!c1.isConnected)return;const c2=card({title:'Voicemail',body:'Mrs. Claus · 0:44',icon:VMIC},box);c2.parentNode.insertBefore(c2,c1);ding();if(box)banTimer();
+      c2.addEventListener('pointerdown',phPrime,{once:true});openFromCard(c2,()=>phOpen('vm'))},3500)};
+  const dt=$('lk-date');
+  dt.addEventListener('pointerdown',e=>e.stopPropagation());
+  dt.addEventListener('pointerup',e=>{e.stopPropagation();audio();wake();mrsClaus()});
+  /* the Phone icon in the dock opens the Phone app too */
+  const dockPh=document.querySelector('#sp-dock .app');
+  dockPh.addEventListener('click',e=>{e.stopPropagation();openApp(dockPh);setTimeout(()=>phOpen('rec'),180)});
+  function phReset(){clearTimeout(mcT);try{phA.pause();phA.currentTime=0}catch(e){}phRow.classList.remove('open','heard');$('ph-tabs').classList.remove('heard');ph.classList.add('hide');phDraw()}
 }
 </script>
 </body>
