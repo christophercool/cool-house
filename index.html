@@ -121,12 +121,12 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
       {v:'fd3.mp4',idle:'fd3_idle.mp4'},  // "Elf me in, it's freezing out here!"   -> "NOPE! No elves allowed!"
       {v:'fd4.mp4'}                       // nyah-nyah, then freezes like a doll
     ]},
-    ki:{name:'Kitchen',    clips:[]},
-    lr:{name:'Living Room',clips:[]},
-    of:{name:'Office',     clips:[]}
+    ki:{name:'Kitchen',    clips:['ki1.mp4']},              // cookie thief, freezes hugging a cookie
+    lr:{name:'Living Room',clips:['lr1.mp4']},              // couch trampoline, flips, lands like a starfish
+    of:{name:'Office',     clips:['of1.mp4']}               // moustache on Christopher's photo, pulls the plug, CAMERA OFFLINE
   };
   /* finale: plays after the 99+ count, zooming out of this tile */
-  const FINALE={tile:'lr', clips:[]};
+  const FINALE={tile:'lr', clips:['finale.mp4']};
 
   const $=id=>document.getElementById(id);
   const stage=$('stage'),cam=$('cam'),badge=$('badge'),msg=$('msg');
@@ -199,7 +199,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   let sy=null,swiped=false;
   cam.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;swiped=false},{passive:true});
   cam.addEventListener('touchmove',e=>{if(sy!==null&&e.touches[0].clientY-sy>70&&!swiped&&!busy){swiped=true;closeCam()}},{passive:true});
-  cam.addEventListener('click',()=>{if(swiped){swiped=false;return}if(busy||!cur||talkRoom)return;if(part<cur.length-1)playPart(part+1);else closeCam()});
+  cam.addEventListener('click',()=>{if(swiped){swiped=false;return}if(busy||!cur||talkRoom)return;const pv=vids[cur[part].v];if(pv&&!pv.ended)return;if(part<cur.length-1)playPart(part+1);else closeCam()});
 
   const reconnecting=(tile,name)=>{flashTile(tile);$('msgtxt').textContent=name+' camera: Reconnecting...';msg.style.display='flex';setTimeout(()=>msg.style.display='none',2200)};
   Object.entries(ROOMS).forEach(([id,r])=>{const t=$(id);t.addEventListener('click',()=>r.clips.length?openCam(t,r.clips,r.talk,r.name):reconnecting(t,r.name))});
