@@ -32,7 +32,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 @keyframes aflash{50%{background:#5a1a1d}}
 .sec{display:flex;align-items:center;gap:6px;margin:2.4vh 0 1.2vh;font-size:clamp(18px,2.5vh,26px);font-weight:800}
 .sec span{color:var(--mute);font-weight:600}
-.grid{flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr;gap:2.6vw;margin-bottom:2.4vh;max-height:62vh}
+.grid{flex:1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr;gap:2.6vw;margin-bottom:0;max-height:57vh}
 .tile{position:relative;border-radius:16px;overflow:hidden;background:#000;cursor:pointer;box-shadow:0 0 0 1px var(--line)}
 .tile img{width:100%;height:100%;object-fit:cover;display:block}
 .tile::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 55%,rgba(0,0,0,.65))}
@@ -104,6 +104,18 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 #notif .nh{display:flex;justify-content:space-between;font-size:clamp(13px,1.75vh,18px);font-weight:700;color:#fff}
 #notif .nh span{color:#b8bec7;font-weight:500}
 #notif .nb{font-size:clamp(14px,1.9vh,20px);color:#e9ecef;margin-top:.2vh;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hp{margin-top:2vh;margin-bottom:2vh}
+#hp .sec{margin:0 0 1.2vh}
+#hpcard{display:flex;align-items:center;gap:3.4vw;background:var(--card);border-radius:18px;padding:1.4vh 4vw;width:100%;transition:background .3s}
+#hpcard svg.pod{width:5.4vh;height:5.4vh;flex:none}
+#hpcard b{display:block;font-size:clamp(15px,2.1vh,21px)}
+#hpcard span{display:block;color:var(--mute);font-size:clamp(13px,1.8vh,18px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#hpcard.playing{background:#2c2440}#hpcard.playing span{color:#c9b8ff}
+#eq{display:none;gap:3px;align-items:flex-end;height:2.2vh;margin-left:auto}
+#hpcard.playing #eq{display:flex}
+#eq i{width:4px;border-radius:2px;background:#c9b8ff;animation:eq .8s ease-in-out infinite}
+#eq i:nth-child(2){animation-delay:.2s}#eq i:nth-child(3){animation-delay:.4s}#eq i:nth-child(4){animation-delay:.1s}
+@keyframes eq{0%,100%{height:25%}50%{height:100%}}
 #msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2.5vh;background:rgba(13,15,18,.95);color:#fff;font-weight:700;font-size:2.4vh;text-align:center;z-index:9}
 #msg .spin{width:6vh;height:6vh;border-radius:50%;border:.7vh solid rgba(255,255,255,.2);border-top-color:#fff;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -127,6 +139,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
       <div class="tile" id="lr"><img src="tile_lr.jpg" alt=""><div class="pill"><i></i>LIVE</div><span>Living Room</span></div>
       <div class="tile" id="of"><img src="tile_of.jpg" alt=""><div class="pill"><i></i><b class="pt">LIVE</b></div><div class="offtxt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l18 18M15 10l5-3v10l-2-1.2M13 17H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1m4 0h3a2 2 0 0 1 2 2v3"/></svg><b class="nrname">Office</b><span class="nr">No Response</span></div><span>Office</span></div>
     </div>
+    <div id="hp"><div class="sec">Living Room <span>›</span></div><div id="hpcard"><svg class="pod" viewBox="0 0 48 48"><ellipse cx="18" cy="14" rx="12" ry="4" fill="#d9d9de"/><path d="M6 14v12c0 6 5.4 10 12 10s12-4 12-10V14c0 2.2-5.4 4-12 4S6 16.2 6 14z" fill="#b9bac2"/><ellipse cx="31" cy="24" rx="12" ry="4" fill="#e6e6ea"/><path d="M19 24v10c0 6 5.4 10 12 10s12-4 12-10V24c0 2.2-5.4 4-12 4s-12-1.8-12-4z" fill="#c8c9d0"/></svg><div><b>HomePod</b><span id="hptxt">Paused</span></div><div id="eq"><i></i><i></i><i></i><i></i></div></div></div>
     <nav id="tabs">
       <div class="tab on" id="homebtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</div>
       <div class="tab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>Automations</div>
@@ -164,6 +177,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     of:{name:'Office',     clips:['of1.mp4'], goesOffline:true}               // moustache on Christopher's photo, pulls the plug, CAMERA OFFLINE
   };
   /* finale: plays after the 99+ count, zooming out of this tile */
+  const SONG='Jingle Bells';  // name shown on the HomePod during the dance party
   const FINALE={tile:'lr', lights:'fin_lights.jpg',
     clips:[{v:'fin_dance.mp4', loop:true, onLights:'fin_freeze.mp4'}]}; // dance loops until Lights: record scratch + freeze
 
@@ -190,9 +204,10 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const setBadge=n=>{count=n;badge.textContent=n>99?'99+':n;badge.classList.remove('pop');void badge.offsetWidth;badge.classList.add('pop')};
   const flashAlert=()=>{const a=$('alert');a.classList.remove('flash');void a.offsetWidth;a.classList.add('flash');setTimeout(()=>a.classList.remove('flash'),1300)};
   const alertNew=()=>{ding();setBadge(count+1);flashAlert();notify('Motion detected inside your home')};
-  const finale=()=>{if(busy)return;busy=true;let n=count;const step=()=>{n+=n<10?1:n<30?3:9;if(n>=99){setBadge(100);ding();flashAlert();$('alerttxt').textContent='99+ motion alerts!';notify('Living Room: 99+ motion alerts');busy=false;if(FINALE.clips.length)setTimeout(()=>openCam($(FINALE.tile),FINALE.clips,false,ROOMS[FINALE.tile].name,FINALE.lights),1200);return}setBadge(n);ding();setTimeout(step,Math.max(70,260-n*4))};step()};
+  const finale=()=>{if(busy)return;busy=true;setPod(true);notify('HomePod · Now playing '+SONG);let n=count;const step=()=>{n+=n<10?1:n<30?3:9;if(n>=99){setBadge(100);ding();flashAlert();$('alerttxt').textContent='99+ motion alerts!';notify('Living Room: 99+ motion alerts');busy=false;if(FINALE.clips.length)setTimeout(()=>openCam($(FINALE.tile),FINALE.clips,false,ROOMS[FINALE.tile].name,FINALE.lights),1200);return}setBadge(n);ding();setTimeout(step,Math.max(70,260-n*4))};setTimeout(step,1600)};
 
 
+  const setPod=on=>{$('hpcard').classList.toggle('playing',on);$('hptxt').textContent=on?'Playing · '+SONG:'Paused'};
   /* ---- iPhone-style notification banner: slides down, then away ---- */
   let nT=null;
   const notify=txt=>{const n=$('notif');$('notiftxt').textContent=txt;n.classList.remove('show');void n.offsetWidth;n.classList.add('show');clearTimeout(nT);nT=setTimeout(()=>n.classList.remove('show'),4000)};
@@ -203,7 +218,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   title.addEventListener('pointerup',()=>{clearTimeout(holdT);if(!held)alertNew();else unlockLoud(FINALE.clips)});
   title.addEventListener('pointerleave',()=>clearTimeout(holdT));
   /* hold Home 1.5s = reset badge to 1 */
-  let rT=null,rHeld=false,unT=null;$('homebtn').addEventListener('pointerdown',()=>{audio();rHeld=false;rT=setTimeout(()=>{setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));unlocked=false;fdDone=false;$('doors').classList.remove('unlocked');$('doorstxt').textContent='Locked';flashTile($('homebtn'));rHeld=true;clearTimeout(unT)},1500)});
+  let rT=null,rHeld=false,unT=null;$('homebtn').addEventListener('pointerdown',()=>{audio();rHeld=false;rT=setTimeout(()=>{setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));unlocked=false;fdDone=false;setPod(false);$('doors').classList.remove('unlocked');$('doorstxt').textContent='Locked';flashTile($('homebtn'));rHeld=true;clearTimeout(unT)},1500)});
   $('homebtn').addEventListener('pointerup',()=>{clearTimeout(rT);if(!rHeld&&!unlocked){clearTimeout(unT);unT=setTimeout(()=>{if(!unlocked)setDoor(true)},3000)}});
 
   /* ---- open a camera: zoom out of its tile ---- */
@@ -241,7 +256,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const autoClose=ms=>{clearTimeout(litT);litT=setTimeout(()=>{if(lit&&cam.style.display==='block'&&!busy)closeCam()},ms)};
   const showLit=()=>{const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');$('lightsimg').classList.add('on')};
   $('lightsbtn').addEventListener('click',e=>{e.stopPropagation();if(lit||busy||!cur)return;const c=cur[part];
-    if(c&&c.onLights){lit=true;$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on';Object.values(vids).forEach(v=>v.onended=null);if(curLights)showLit();playSrc(c.onLights,false);autoClose(4000);return}
+    if(c&&c.onLights){lit=true;setPod(false);$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on';Object.values(vids).forEach(v=>v.onended=null);if(curLights)showLit();playSrc(c.onLights,false);autoClose(4000);return}
     if(!curLights){click();return}
     lit=true;click();Object.values(vids).forEach(v=>{v.pause();v.onended=null});showLit();autoClose(3000);$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on'});
   $('lightsbar').addEventListener('click',e=>e.stopPropagation());
