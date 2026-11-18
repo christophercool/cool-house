@@ -175,7 +175,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 
   /* ---- secret controls on the title: tap = new alert, hold = 99+ finale ---- */
   let holdT=null,held=false;const title=$('title');
-  title.addEventListener('pointerdown',()=>{audio();wake();held=false;holdT=setTimeout(()=>{held=true;finale()},700)});
+  title.addEventListener('pointerdown',()=>{audio();wake();held=false;prime([{v:'__none__'},...FINALE.clips]);holdT=setTimeout(()=>{held=true;finale()},700)});
   title.addEventListener('pointerup',()=>{clearTimeout(holdT);if(!held)alertNew()});
   title.addEventListener('pointerleave',()=>clearTimeout(holdT));
   /* hold Home 1.5s = reset badge to 1 */
@@ -186,7 +186,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const flashTile=el=>{el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')};
   const tileXf=el=>{const sr=stage.getBoundingClientRect(),tr=el.getBoundingClientRect();return `translate(${tr.left-sr.left}px,${tr.top-sr.top}px) scale(${tr.width/sr.width},${tr.height/sr.height})`};
   /* iPhone only allows sound after a tap, so on opening a camera, quietly unlock every clip in that room */
-  const prime=clips=>clips.flatMap(c=>c.idle?[c.v,c.idle]:[c.v]).slice(1).forEach(src=>{const v=vids[src];const p=(v.muted=true,v.play());const back=()=>{v.pause();try{v.currentTime=0}catch(e){}v.muted=false};if(p&&p.then)p.then(back).catch(()=>{v.muted=false});else back()});
+  const prime=clips=>clips.flatMap(c=>c.idle?[c.v,c.idle]:[c.v]).slice(1).forEach(src=>{const v=vids[src];if(!v)return;const p=(v.muted=true,v.play());const back=()=>{v.pause();try{v.currentTime=0}catch(e){}v.muted=false};if(p&&p.then)p.then(back).catch(()=>{v.muted=false});else back()});
   const openCam=(tile,clips,talk,name,lights)=>{
     if(busy)return;busy=true;audio();wake();flashTile(tile);
     curLights=lights||null;lit=false;$('lightsbtn').classList.remove('lit');$('lightslbl').textContent='Turn on lights';$('lightsimg').classList.remove('on');$('lightsbar').classList.remove('show');if(curLights)$('lightsimg').src=curLights;
@@ -200,10 +200,10 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   };
   /* show a video only once it is actually playing, so there is never a black flash */
   const playSrc=(src,loop)=>{
-    const v=vids[src];v.loop=!!loop;try{v.currentTime=0}catch(e){}
+    const v=vids[src];v.loop=!!loop;v.muted=false;try{v.currentTime=0}catch(e){}
     const swap=()=>{v.removeEventListener('playing',swap);v.classList.add('on');Object.values(vids).forEach(o=>{if(o!==v){o.classList.remove('on');o.pause()}})};
     v.addEventListener('playing',swap);
-    const p=v.play();if(p&&p.catch)p.catch(()=>v.removeEventListener('playing',swap));
+    const p=v.play();if(p&&p.catch)p.catch(()=>{v.muted=true;const p2=v.play();if(p2&&p2.catch)p2.catch(()=>v.removeEventListener('playing',swap))});
   };
   const offline=new Set();
   const setOffline=(id,on)=>{const t=$(id);if(!t)return;t.classList.toggle('off',on);const pt=t.querySelector('.pt');if(pt)pt.textContent=on?'OFFLINE':'LIVE';on?offline.add(id):offline.delete(id)};
