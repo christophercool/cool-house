@@ -186,8 +186,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   title.addEventListener('pointerup',()=>{clearTimeout(holdT);if(!held)alertNew();else unlockLoud(FINALE.clips)});
   title.addEventListener('pointerleave',()=>clearTimeout(holdT));
   /* hold Home 1.5s = reset badge to 1 */
-  let rT=null;$('homebtn').addEventListener('pointerdown',()=>{rT=setTimeout(()=>{setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));unlocked=false;fdDone=false;$('doors').classList.remove('unlocked');$('doorstxt').textContent='Locked';flashTile($('homebtn'))},1500)});
-  $('homebtn').addEventListener('pointerup',()=>clearTimeout(rT));
+  let rT=null,rHeld=false,unT=null;$('homebtn').addEventListener('pointerdown',()=>{audio();rHeld=false;rT=setTimeout(()=>{setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));unlocked=false;fdDone=false;$('doors').classList.remove('unlocked');$('doorstxt').textContent='Locked';flashTile($('homebtn'));rHeld=true;clearTimeout(unT)},1500)});
+  $('homebtn').addEventListener('pointerup',()=>{clearTimeout(rT);if(!rHeld&&!unlocked){clearTimeout(unT);unT=setTimeout(()=>{if(!unlocked)setDoor(true)},3000)}});
 
   /* ---- open a camera: zoom out of its tile ---- */
   const flashTile=el=>{el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')};
@@ -243,7 +243,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   let unlocked=false,fdDone=false;
   const setDoor=u=>{unlocked=u;const d=$('doors');d.classList.toggle('unlocked',u);$('doorstxt').textContent=u?'Unlocked':'Locked';
     if(u){ding();$('alerttxt').textContent='Front Door was unlocked';flashAlert()}else{d.classList.add('justlocked');setTimeout(()=>d.classList.remove('justlocked'),1500)}};
-  $('doors').addEventListener('click',()=>{audio();if(unlocked){click();setDoor(false);$('alerttxt').textContent='Front Door locked'}else setDoor(true)});
+  $('doors').addEventListener('click',()=>{audio();if(unlocked){click();setDoor(false);$('alerttxt').textContent='Front Door locked'}});
   /* ---- swipe down to close; in tap rooms, tap = next clip, tap after last = back home ---- */
   let sy=null,swiped=false;
   cam.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;swiped=false},{passive:true});
