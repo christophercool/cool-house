@@ -237,6 +237,41 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 #ph-tabs.heard .ph-bdg::after{display:none}
 #ph-home{position:absolute;left:30%;right:30%;bottom:0;height:3.2cqh;display:flex;align-items:flex-end;padding-bottom:.8cqh;cursor:pointer}
 #ph-home i{display:block;width:100%;height:.6cqh;border-radius:1cqh;background:#000}
+
+/* ---- Santa phone call (incoming + in-call), iOS 26 contact poster ---- */
+#call{position:absolute;inset:0;z-index:16;background:#3a0d0d url(santa.jpg) center top/cover no-repeat;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;transition:opacity .3s}
+#call.hide{opacity:0;pointer-events:none}
+#call::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.45),transparent 30%,transparent 55%,rgba(0,0,0,.7));transition:background .4s}
+#call.live::before{background:rgba(0,0,0,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.cl-top{position:absolute;left:0;right:0;top:7cqh;text-align:center;z-index:1}
+.cl-sub{font-size:clamp(15px,2.1cqh,21px);color:rgba(255,255,255,.85);font-weight:500}
+.cl-name{font-size:clamp(40px,6.2cqh,64px);font-weight:700;letter-spacing:-.5px;line-height:1.05;text-shadow:0 2px 14px rgba(0,0,0,.4)}
+.cl-in .cl-sub:first-child{animation:clp 1.6s ease-in-out infinite}
+@keyframes clp{50%{opacity:.45}}
+.cl-in,.cl-live{position:absolute;inset:0;display:none}
+#call:not(.live) .cl-in,#call.live .cl-live{display:block}
+.cl-row{position:absolute;left:12cqw;right:12cqw;bottom:9cqh;display:flex;justify-content:space-between;z-index:1}
+.cl-b{display:grid;justify-items:center;gap:1cqh;font-size:clamp(13px,1.8cqh,18px);font-weight:500;cursor:pointer}
+.cl-c{width:9.4cqh;height:9.4cqh;border-radius:50%;display:grid;place-items:center;box-shadow:0 1cqh 3cqh rgba(0,0,0,.35)}
+.cl-c svg{width:44%;height:44%}
+.cl-red{background:#ff3b30}.cl-grn{background:#30d158}
+.cl-grn{animation:clg 1.2s ease-in-out infinite}
+@keyframes clg{50%{transform:scale(1.07)}}
+.cl-mini{position:absolute;left:12cqw;right:12cqw;bottom:24cqh;display:flex;justify-content:space-between;z-index:1;font-size:clamp(13px,1.8cqh,18px)}
+.cl-mini div{display:grid;justify-items:center;gap:.8cqh;width:9.4cqh;white-space:nowrap}
+.cl-mini span{width:6cqh;height:6cqh;border-radius:50%;background:rgba(255,255,255,.22);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:grid;place-items:center}
+.cl-mini svg{width:50%;height:50%}
+.cl-live .cl-top{top:9cqh}
+.cl-live .cl-av{width:13cqh;height:13cqh;border-radius:50%;margin:0 auto 1.6cqh;background:#7a1c1c url(santa.jpg) 30% 18%/260% auto;box-shadow:0 0 0 .4cqh rgba(255,255,255,.25)}
+#cl-time{font-variant-numeric:tabular-nums}
+.cl-grid{position:absolute;left:10cqw;right:10cqw;bottom:24cqh;display:grid;grid-template-columns:repeat(3,1fr);gap:3.2cqh 0;justify-items:center;z-index:1}
+.cl-g{display:grid;justify-items:center;gap:.9cqh;font-size:clamp(12px,1.7cqh,17px);font-weight:500;cursor:pointer}
+.cl-g span{width:9cqh;height:9cqh;border-radius:50%;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);display:grid;place-items:center;transition:background .2s,color .2s}
+.cl-g span svg{width:42%;height:42%}
+.cl-g.on span{background:#fff;color:#111}
+#cl-end{position:absolute;left:50%;bottom:8cqh;transform:translateX(-50%);z-index:1}
+#call.ended .cl-live .cl-sub{color:#ff6a60}
+#call.ended .cl-grid,#call.ended #cl-end{opacity:.4;pointer-events:none}
 @media (prefers-reduced-motion:reduce){#cam.zoom{transition:none}}
 </style>
 </head>
@@ -315,6 +350,29 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     </nav>
     <div id="ph-home"><i></i></div>
     <audio id="ph-aud" src="mrs_claus_vm.mp3" preload="auto"></audio>
+  </div>
+  <div id="call" class="hide">
+    <audio id="cl-ring" src="santa_ring.mp3" preload="auto" loop></audio>
+    <div class="cl-in">
+      <div class="cl-top"><div class="cl-sub">incoming call</div><div class="cl-name">Santa Claus</div><div class="cl-sub">North Pole</div></div>
+      <div class="cl-mini"><div><span><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>Remind Me</div><div><span><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.4 1.3 4.6 3.4 6-.2 1.3-.8 2.6-1.8 3.6 2 0 3.8-.8 5-1.9 1.1.3 2.2.4 3.4.4 5.5 0 10-3.6 10-8s-4.5-8-10-8z"/></svg></span>Message</div></div>
+      <div class="cl-row">
+        <div class="cl-b" id="cl-dec"><div class="cl-c cl-red"><svg viewBox="0 0 24 24" fill="#fff" style="transform:rotate(135deg)"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></div>Decline</div>
+        <div class="cl-b" id="cl-acc"><div class="cl-c cl-grn"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></div>Accept</div>
+      </div>
+    </div>
+    <div class="cl-live">
+      <div class="cl-top"><div class="cl-av"></div><div class="cl-name">Santa Claus</div><div class="cl-sub" id="cl-time">0:00</div></div>
+      <div class="cl-grid">
+        <div class="cl-g" data-t><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12"/></svg></span>Speaker</div>
+        <div class="cl-g"><span><svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="6" width="14" height="12" rx="3"/><path d="M17 10l5-3v10l-5-3z"/></svg></span>FaceTime</div>
+        <div class="cl-g" data-t><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M4 4l16 16"/></svg></span>Mute</div>
+        <div class="cl-g"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>Add</div>
+        <div class="cl-g"><span><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 6 0 0 1 14 0z"/><circle cx="18" cy="9" r="2.5" opacity=".7"/></svg></span>Contacts</div>
+        <div class="cl-g"><span><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="5" r="2.3"/><circle cx="12" cy="5" r="2.3"/><circle cx="19" cy="5" r="2.3"/><circle cx="5" cy="12" r="2.3"/><circle cx="12" cy="12" r="2.3"/><circle cx="19" cy="12" r="2.3"/><circle cx="5" cy="19" r="2.3"/><circle cx="12" cy="19" r="2.3"/><circle cx="19" cy="19" r="2.3"/></svg></span>Keypad</div>
+      </div>
+      <div class="cl-b" id="cl-end"><div class="cl-c cl-red"><svg viewBox="0 0 24 24" fill="#fff" style="transform:rotate(135deg)"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></div></div>
+    </div>
   </div>
   <div id="ban"></div>
   <div id="lock">
@@ -448,6 +506,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
      Secret controls on the lock screen:
        (app opens with NO notification)
        tap the clock      = next camera notification in SEQ order
+       tap the camera btn = Santa incoming call (silent, ring is in QLab)
        tap the date       = Mrs. Claus: Missed Call, then a Voicemail notification 3.5s later
        hold the clock     = HomePod plays + 99+ notifications pile up (tap it for the dance party)
        swipe up           = Face ID unlock to the Cool House home screen
@@ -598,7 +657,29 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   /* the Phone icon in the dock opens the Phone app too */
   const dockPh=document.querySelector('#sp-dock .app');
   dockPh.addEventListener('click',e=>{e.stopPropagation();openApp(dockPh);setTimeout(()=>phOpen('rec'),180)});
-  function phReset(){clearTimeout(mcT);try{phA.pause();phA.currentTime=0}catch(e){}phRow.classList.remove('open','heard');$('ph-tabs').classList.remove('heard');ph.classList.add('hide');phDraw()}
+
+  /* ===== SANTA CALL =====
+     tap the lock-screen CAMERA button = Santa's incoming call. QLab plays one ring pass while the phone is in
+     the pocket; the app keeps ringing the same jingle (santa_ring.mp3, through NDI) until Accept or Decline.
+     Accept = in-call screen with timer; End = "Call Ended", back to the lock screen.
+     Repeat as often as you like; each call adds Santa to the top of Recents. */
+  const call=$('call');let clT=null,clS=0,clN=0;
+  const ring=$('cl-ring');const ringStop=()=>{try{ring.pause();ring.currentTime=0}catch(e){}};
+  const clRing=()=>{if(!call.classList.contains('hide'))return;try{ring.currentTime=0;const p=ring.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}clearInterval(clT);call.classList.remove('live','ended');call.querySelectorAll('.cl-g.on').forEach(g=>g.classList.remove('on'));call.classList.remove('hide')};
+  const clRecent=()=>{clN++;const l=$('ph-rlist'),old=l.querySelector('.ph-santa');if(old)old.remove();
+    l.insertAdjacentHTML('afterbegin',`<div class="ph-rc ph-santa"><div class="ph-av" style="background:#7a1c1c url(santa.jpg) center 20%/cover"></div><div class="ph-mid"><div class="ph-txt"><div class="ph-nm">Santa Claus${clN>1?' ('+clN+')':''}</div><div class="ph-st">${IN} North Pole</div></div><span class="ph-wh">now</span><span class="ph-i">i</span></div></div>`)};
+  const clHide=()=>{ringStop();clearInterval(clT);call.classList.add('hide');setTimeout(()=>call.classList.remove('live','ended'),320);lockShow()};
+  $('cl-acc').addEventListener('click',e=>{e.stopPropagation();ringStop();audio();click();clS=0;$('cl-time').textContent='0:00';call.classList.add('live');clRecent();
+    clT=setInterval(()=>{clS++;$('cl-time').textContent=Math.floor(clS/60)+':'+String(clS%60).padStart(2,'0')},1000)});
+  $('cl-dec').addEventListener('click',e=>{e.stopPropagation();clHide()});
+  $('cl-end').addEventListener('click',e=>{e.stopPropagation();clearInterval(clT);call.classList.add('ended');$('cl-time').textContent='Call Ended';setTimeout(clHide,1300)});
+  call.querySelectorAll('.cl-g[data-t]').forEach(g=>g.addEventListener('click',e=>{e.stopPropagation();g.classList.toggle('on')}));
+  call.addEventListener('pointerdown',e=>e.stopPropagation());call.addEventListener('pointerup',e=>e.stopPropagation());
+  const lkCam=document.querySelectorAll('#lk-bot .lkb')[1];
+  lkCam.style.cursor='pointer';
+  lkCam.addEventListener('pointerdown',e=>e.stopPropagation());
+  lkCam.addEventListener('pointerup',e=>{e.stopPropagation();audio();wake();clRing()});
+  function phReset(){ringStop();clearInterval(clT);call.classList.add('hide');call.classList.remove('live','ended');clearTimeout(mcT);try{phA.pause();phA.currentTime=0}catch(e){}phRow.classList.remove('open','heard');$('ph-tabs').classList.remove('heard');ph.classList.add('hide');phDraw()}
 }
 </script>
 </body>
