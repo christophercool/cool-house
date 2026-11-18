@@ -77,10 +77,11 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 @keyframes fl{0%{opacity:.9}100%{opacity:0}}
 #lightsbar{position:absolute;left:0;right:0;bottom:0;padding:6vh 0 calc(env(safe-area-inset-bottom,0px) + 3.5vh);display:none;flex-direction:column;align-items:center;gap:1.4vh;background:linear-gradient(transparent,rgba(0,0,0,.7));z-index:7}
 #lightsbar.show{display:flex}
-#lightsbtn{width:11vh;height:11vh;border-radius:50%;background:#ffd23f;color:#111;display:grid;place-items:center;box-shadow:0 .8vh 3vh rgba(0,0,0,.55),0 0 3vh rgba(255,210,63,.45);animation:lp 1.4s ease-in-out infinite}
+#lightsbtn{width:11vh;height:11vh;border-radius:50%;background:#fff;color:#111;display:grid;place-items:center;transition:transform .12s,background .2s,color .2s;box-shadow:0 .8vh 3vh rgba(0,0,0,.55)}
+#lightsbtn.lit{background:#ffd23f;color:#111;box-shadow:0 0 0 1.3vh rgba(255,210,63,.35),0 0 4vh rgba(255,210,63,.6)}
+#lightsbtn:active{transform:scale(1.1)}
 #lightsbtn svg{width:5vh;height:5vh}
-@keyframes lp{50%{box-shadow:0 .8vh 3vh rgba(0,0,0,.55),0 0 5vh rgba(255,210,63,.8)}}
-#lightslbl{color:#fff;font-weight:700;font-size:2vh;text-shadow:0 1px 6px #000}
+#lightslbl{color:#fff;font-weight:700;font-size:2vh;text-shadow:0 1px 6px #000;min-height:2.6vh}
 .tile.off img{opacity:0}.tile.off{background:#000}
 .tile.off .pill{background:#3a3f47}.tile.off .pill i{display:none;animation:none}
 .tile .offtxt{display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:.8vh;color:#9aa3ad;font-weight:700;font-size:clamp(13px,1.8vh,18px);z-index:1}
@@ -124,7 +125,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   </div>
   <img id="lightsimg" alt="">
   <div id="flash"></div>
-  <div id="lightsbar"><div id="lightslbl">Lights</div><div id="lightsbtn" aria-label="Turn on lights"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 21h6v-1H9v1zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2z"/></svg></div></div>
+  <div id="lightsbar"><div id="lightslbl">Turn on lights</div><div id="lightsbtn" aria-label="Turn on lights"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 21h6v-1H9v1zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2z"/></svg></div></div>
   <div id="msg"><div class="spin"></div><div id="msgtxt">Reconnecting...</div></div>
 </div>
 <script>
@@ -140,8 +141,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
       {v:'fd3.mp4',idle:'fd3_idle.mp4'},  // "Elf me in, it's freezing out here!"   -> "NOPE! No elves allowed!"
       {v:'fd4.mp4'}                       // nyah-nyah, then freezes like a doll
     ]},
-    ki:{name:'Kitchen',    clips:['ki1.mp4'], lights:'ki_lights.jpg'},              // cookie thief, freezes hugging a cookie
-    lr:{name:'Living Room',clips:['lr1.mp4'], lights:'lr_lights.jpg'},              // couch trampoline, flips, lands like a starfish
+    ki:{name:'Kitchen',    clips:[{v:'ki1.mp4',idle:'ki1_idle.mp4'}], lights:'ki_lights.jpg'},              // cookie thief, freezes hugging a cookie
+    lr:{name:'Living Room',clips:[{v:'lr1.mp4',idle:'lr1_idle.mp4'}], lights:'lr_lights.jpg'},              // couch trampoline, flips, lands like a starfish
     of:{name:'Office',     clips:['of1.mp4'], goesOffline:true}               // moustache on Christopher's photo, pulls the plug, CAMERA OFFLINE
   };
   /* finale: plays after the 99+ count, zooming out of this tile */
@@ -188,14 +189,14 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const prime=clips=>clips.flatMap(c=>c.idle?[c.v,c.idle]:[c.v]).slice(1).forEach(src=>{const v=vids[src];const p=(v.muted=true,v.play());const back=()=>{v.pause();try{v.currentTime=0}catch(e){}v.muted=false};if(p&&p.then)p.then(back).catch(()=>{v.muted=false});else back()});
   const openCam=(tile,clips,talk,name,lights)=>{
     if(busy)return;busy=true;audio();wake();flashTile(tile);
-    curLights=lights||null;lit=false;$('lightsimg').classList.remove('on');$('lightsbar').classList.remove('show');if(curLights)$('lightsimg').src=curLights;
+    curLights=lights||null;lit=false;$('lightsbtn').classList.remove('lit');$('lightslbl').textContent='Turn on lights';$('lightsimg').classList.remove('on');$('lightsbar').classList.remove('show');if(curLights)$('lightsimg').src=curLights;
     cur=clips;curTile=tile;talkRoom=!!talk;curRoom=tile.id;$('camname').textContent=name||'';
     Object.values(vids).forEach(v=>{v.pause();v.onended=null;v.classList.remove('on')});
     prime(clips);
     const first=vids[clips[0].v];first.currentTime=0;first.classList.add('on');
     cam.classList.remove('zoom');cam.style.display='block';cam.style.transform=tileXf(tile);cam.style.borderRadius='6%';
     requestAnimationFrame(()=>requestAnimationFrame(()=>{cam.classList.add('zoom');cam.style.transform='none';cam.style.borderRadius='0'}));
-    setTimeout(()=>{playPart(0);busy=false;$('close').classList.add('show');$('camtop').classList.add('show');$('talkbar').classList.toggle('show',talkRoom)},470);
+    setTimeout(()=>{playPart(0);busy=false;$('close').classList.add('show');$('camtop').classList.add('show');$('talkbar').classList.toggle('show',talkRoom);$('lightsbar').classList.toggle('show',!!curLights)},470);
   };
   /* show a video only once it is actually playing, so there is never a black flash */
   const playSrc=(src,loop)=>{
@@ -206,10 +207,10 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   };
   const offline=new Set();
   const setOffline=(id,on)=>{const t=$(id);if(!t)return;t.classList.toggle('off',on);const pt=t.querySelector('.pt');if(pt)pt.textContent=on?'OFFLINE':'LIVE';on?offline.add(id):offline.delete(id)};
-  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part!==i)return;if(i===cur.length-1&&curRoom&&ROOMS[curRoom].goesOffline)setOffline(curRoom,true);if(c.idle)playSrc(c.idle,true);else if(i===cur.length-1&&curLights&&!lit)$('lightsbar').classList.add('show')};playSrc(c.v,false)};
+  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part!==i)return;if(c.idle)playSrc(c.idle,true);};v.ontimeupdate=()=>{if(curRoom&&ROOMS[curRoom].goesOffline&&v.currentTime>14.6)setOffline(curRoom,true)};playSrc(c.v,false)};
   /* LIGHTS: click sound, flash, room lit up with the elf caught frozen */
   const click=()=>{const a=audio();if(!a)return;const t=a.currentTime;const b=a.createBuffer(1,a.sampleRate*.04,a.sampleRate),d=b.getChannelData(0);for(let k=0;k<d.length;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/d.length,6);const s=a.createBufferSource(),g=a.createGain();g.gain.value=.9;s.buffer=b;s.connect(g).connect(a.destination);s.start(t)};
-  $('lightsbtn').addEventListener('click',e=>{e.stopPropagation();if(lit)return;lit=true;click();$('lightsbar').classList.remove('show');const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');$('lightsimg').classList.add('on')});
+  $('lightsbtn').addEventListener('click',e=>{e.stopPropagation();if(lit||busy)return;lit=true;click();Object.values(vids).forEach(v=>{v.pause();v.onended=null});const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');$('lightsimg').classList.add('on');$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on'});
   $('lightsbar').addEventListener('click',e=>e.stopPropagation());
   const closeCam=()=>{if(cam.style.display!=='block')return;busy=true;$('lightsimg').classList.remove('on');lit=false;['close','camtop','talkbar','lightsbar'].forEach(id=>$(id).classList.remove('show'));Object.values(vids).forEach(v=>{v.pause();v.onended=null});cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false},470)};
   $('close').addEventListener('click',e=>{e.stopPropagation();if(!busy)closeCam()});
@@ -225,7 +226,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   let sy=null,swiped=false;
   cam.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;swiped=false},{passive:true});
   cam.addEventListener('touchmove',e=>{if(sy!==null&&e.touches[0].clientY-sy>70&&!swiped&&!busy){swiped=true;closeCam()}},{passive:true});
-  cam.addEventListener('click',()=>{if(swiped){swiped=false;return}if(busy||!cur||talkRoom)return;const pv=vids[cur[part].v];if(pv&&!pv.ended)return;if(curLights&&!lit&&part===cur.length-1)return;if(part<cur.length-1)playPart(part+1);else closeCam()});
+  cam.addEventListener('click',()=>{if(swiped){swiped=false;return}if(busy||!cur||talkRoom)return;if(curLights){if(lit)closeCam();return}const pv=vids[cur[part].v];if(pv&&!pv.ended)return;if(part<cur.length-1)playPart(part+1);else closeCam()});
 
   const offlineMsg=(tile,name)=>{flashTile(tile);$('msgtxt').textContent=name+' camera is offline';msg.querySelector('.spin').style.display='none';msg.style.display='flex';setTimeout(()=>{msg.style.display='none';msg.querySelector('.spin').style.display=''},2200)};
   const reconnecting=(tile,name)=>{flashTile(tile);$('msgtxt').textContent=name+' camera: Reconnecting...';msg.style.display='flex';setTimeout(()=>msg.style.display='none',2200)};
