@@ -369,6 +369,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const lock=$('lock'),lkList=$('lk-list');
   const tick=()=>{const d=new Date();$('lk-time').textContent=d.getHours()%12||12;$('lk-time').textContent+=':'+String(d.getMinutes()).padStart(2,'0');$('lk-date').textContent=d.toLocaleDateString('en-US',{weekday:'short'})+' '+d.toLocaleDateString('en-US',{month:'short'})+' '+d.getDate()};
   tick();setInterval(tick,5000);
+  setTimeout(()=>{if(seqI===0)nextAlert()},300);
   function lockShow(){lock.classList.remove('hide','scan','open');lkBusy=false}
   const faceId=done=>{if(lkBusy)return;lkBusy=true;lock.classList.add('scan');setTimeout(()=>{lock.classList.remove('scan');lock.classList.add('open');click()},480);setTimeout(()=>{done();lock.classList.add('hide');lkBusy=false},850)};
   const card=(o,box)=>{const c=document.createElement('div');c.className='ln'+(o.stack?' stack':'');c.innerHTML=`<img class="ic" src="icon.png" alt=""><div class="nt"><div class="ttl">${o.title}</div><div class="nb">${o.body||''}</div>${o.more?'<div class="nm"></div>':''}</div>${o.thumb?`<img class="th" src="${o.thumb}" alt="">`:''}`;(box||lkList).appendChild(c);return c};
@@ -379,7 +380,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const preUnlock=id=>{const r=ROOMS[id];if(r&&r.clips.length)unlockLoud(r.clips)};
   const nextAlert=()=>{
     while(seqI<SEQ.length&&SEQ[seqI]!=='door'&&offline.has(SEQ[seqI]))seqI++;
-    if(seqI>=SEQ.length)return;const id=SEQ[seqI++];clearCards();ding();setBadge(count+1);const box=isLocked()?null:$('ban');banTimer();
+    if(seqI>=SEQ.length)return;const id=SEQ[seqI++];clearCards();setBadge(count+1);const box=isLocked()?null:$('ban');banTimer();
     if(id==='door'){const c=card({title:'Front Door',body:'Front Door was unlocked.'},box);openFromCard(c,()=>{setTimeout(()=>setDoor(true),350)});return}
     const r=ROOMS[id];const c=card({title:r.name,body:id==='fd'?'Motion was detected at the Front Door.':'Motion was detected in the '+r.name+'.',thumb:$(id).querySelector('img').getAttribute('src')},box);
     c.addEventListener('pointerdown',()=>preUnlock(id),{once:true});
@@ -401,7 +402,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   /* hold flashlight = full reset */
   let flT=null;$('lk-flash').addEventListener('pointerdown',e=>{e.stopPropagation();flT=setTimeout(()=>{fullReset();click()},1500)});
   $('lk-flash').addEventListener('pointerup',()=>clearTimeout(flT));
-  function fullReset(){seqI=0;spShow();clearCards();$('lk-np').classList.remove('show');setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));unlocked=false;fdDone=false;setPod(false);$('doors').classList.remove('unlocked');$('doorstxt').textContent='Locked';lockShow()}
+  function fullReset(){seqI=0;spShow();setTimeout(()=>{if(isLocked()&&!lkList.querySelector('.ln'))nextAlert()},50);clearCards();$('lk-np').classList.remove('show');setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));unlocked=false;fdDone=false;setPod(false);$('doors').classList.remove('unlocked');$('doorstxt').textContent='Locked';lockShow()}
 
   /* ===== iPhone icon screen =====
      widget clock: tap = next notification banner, hold = finale
