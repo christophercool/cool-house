@@ -305,6 +305,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 .txic .txav{width:100%;height:100%;border-radius:50%;background:#7a1c1c url(santa.jpg) 30% 18%/260% auto}
 .txic .txb{position:absolute;right:-.5cqh;bottom:-.5cqh;width:2.6cqh;height:2.6cqh;border-radius:.7cqh;background:linear-gradient(#5ff07a,#2bc44c);display:grid;place-items:center;box-shadow:0 0 0 .25cqh rgba(0,0,0,.25)}
 .txic .txb svg{width:70%;height:70%}
+.ph-fav{cursor:pointer}.ph-fav.pick .ph-mid{background:#f2f2f4}
+.ph-fi{flex:none;color:#0a7aff;font:600 2.5cqh Georgia,serif;font-style:italic;width:5cqh;height:5cqh;border-radius:50%;background:#f0f0f2;display:grid;place-items:center}
 @media (prefers-reduced-motion:reduce){#cam.zoom{transition:none}}
 </style>
 </head>
@@ -355,6 +357,11 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
       <div class="ph-search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.4"><circle cx="10" cy="10" r="7"/><path d="M15 15l6 6"/></svg>Search</div>
       <div class="ph-list" id="ph-rlist"></div>
     </section>
+    <section class="ph-scr" id="ph-fav">
+      <div class="ph-bar"><span class="ph-btn">Edit</span><span class="ph-btn ph-rnd" style="font-size:3cqh;color:#000">+</span></div>
+      <div class="ph-h1">Favourites</div>
+      <div class="ph-list" id="ph-flist"></div>
+    </section>
     <section class="ph-scr" id="ph-vm">
       <div class="ph-bar"><span class="ph-btn">Edit</span><span class="ph-btn">Greeting</span></div>
       <div class="ph-h1">Voicemail</div>
@@ -375,7 +382,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
       </div>
     </section>
     <nav id="ph-tabs">
-      <div><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21l1.4-7L2 9.3l7-.8z"/></svg>Favourites</div>
+      <div data-ph="fav"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7L12 17.6 5.8 21l1.4-7L2 9.3l7-.8z"/></svg>Favourites</div>
       <div data-ph="rec"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M12 6v6h-4" stroke="#fff" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>Recents</div>
       <div><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="9.5" r="3.5" fill="#fff"/><path d="M5.5 18.5a7.5 5 0 0 1 13 0" fill="#fff"/></svg>Contacts</div>
       <div><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="5" r="2.4"/><circle cx="12" cy="5" r="2.4"/><circle cx="19" cy="5" r="2.4"/><circle cx="5" cy="12" r="2.4"/><circle cx="12" cy="12" r="2.4"/><circle cx="19" cy="12" r="2.4"/><circle cx="5" cy="19" r="2.4"/><circle cx="12" cy="19" r="2.4"/><circle cx="19" cy="19" r="2.4"/></svg>Keypad</div>
@@ -394,6 +401,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   </div>
   <div id="call" class="hide">
     <audio id="cl-ring" src="santa_ring.mp3" preload="auto" loop></audio>
+    <audio id="cl-out" preload="auto"></audio>
     <div class="cl-in">
       <div class="cl-top"><div class="cl-sub">incoming call</div><div class="cl-name">Santa Claus</div><div class="cl-sub">North Pole</div></div>
       <div class="cl-mini"><div><span><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>Remind Me</div><div><span><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.4 1.3 4.6 3.4 6-.2 1.3-.8 2.6-1.8 3.6 2 0 3.8-.8 5-1.9 1.1.3 2.2.4 3.4.4 5.5 0 10-3.6 10-8s-4.5-8-10-8z"/></svg></span>Message</div></div>
@@ -548,7 +556,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
        tap the flashlight = next text message from Santa (hold 1.5s = full reset)
        tap the date       = Mrs. Claus: Missed Call, then a Voicemail notification 3.5s later
        hold the clock     = HomePod plays + 99+ notifications pile up (tap it for the dance party)
-       swipe up           = Face ID unlock to the Cool House home screen
+       swipe up           = Face ID unlock to the iPhone home screen; Phone (dock) -> Favourites -> Santa = call Santa's voicemail, he texts back
        hold flashlight 1.5s = reset everything for the next show
   */
   const SEQ=['fd','ki','door','lr','of'];
@@ -597,7 +605,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   ck.addEventListener('pointerleave',()=>clearTimeout(ckT));
   /* swipe up = Face ID to home screen */
   let lsy=null;lock.addEventListener('pointerdown',e=>{lsy=e.clientY});
-  lock.addEventListener('pointerup',e=>{if(lsy!==null&&lsy-e.clientY>90)faceId(()=>spShow());lsy=null});
+  lock.addEventListener('pointerup',e=>{if(lsy!==null&&lsy-e.clientY>90)faceId(()=>{spShow();$('spring').classList.remove('hide')});lsy=null});
   /* hold flashlight = full reset */
   let flT=null,flHeld=false;$('lk-flash').addEventListener('pointerdown',e=>{e.stopPropagation();flHeld=false;flT=setTimeout(()=>{flHeld=true;fullReset();click()},1500)});
   $('lk-flash').addEventListener('pointerup',e=>{e.stopPropagation();clearTimeout(flT);if(!flHeld){audio();wake();santaText()}});
@@ -672,7 +680,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const vmBadge=()=>$('ph-tabs').classList.toggle('heard',!document.querySelector('#ph-vm .ph-vr[data-src]:not(.heard)'));
   /* open one voicemail row: the player moves into it and loads that row's audio */
   const phSel=row=>{if(phCur!==row){try{phA.pause()}catch(e){}if(phCur)phCur.classList.remove('open');phCur=row;row.appendChild(phPl);$('ph-trx').textContent=row.dataset.tr;phA.src=blobs[row.dataset.src]||row.dataset.src;try{phA.load()}catch(e){}}row.classList.add('open');phDraw()};
-  const phTab=(t,row)=>{$('ph-rec').classList.toggle('on',t==='rec');$('ph-vm').classList.toggle('on',t==='vm');document.querySelectorAll('#ph-tabs [data-ph]').forEach(d=>d.classList.toggle('on',d.dataset.ph===t));if(t==='vm')phSel(row||phCur||phRow)};
+  const phTab=(t,row)=>{$('ph-rec').classList.toggle('on',t==='rec');$('ph-fav').classList.toggle('on',t==='fav');$('ph-vm').classList.toggle('on',t==='vm');document.querySelectorAll('#ph-tabs [data-ph]').forEach(d=>d.classList.toggle('on',d.dataset.ph===t));if(t==='vm')phSel(row||phCur||phRow)};
   const phOpen=(t,row)=>{phTab(t,row);ph.classList.remove('hide')};
   ph.addEventListener('click',e=>{const d=e.target.closest('[data-ph]');if(d){e.stopPropagation();phTab(d.dataset.ph)}});
   $('ph-vm').addEventListener('click',e=>{if(e.target.closest('.ph-pl'))return;const r=e.target.closest('.ph-vr[data-src]');if(!r)return;if(r===phCur&&r.classList.contains('open'))r.classList.remove('open');else phSel(r)});
@@ -703,7 +711,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   dt.addEventListener('pointerup',e=>{e.stopPropagation();audio();wake();mrsClaus()});
   /* the Phone icon in the dock opens the Phone app too */
   const dockPh=document.querySelector('#sp-dock .app');
-  dockPh.addEventListener('click',e=>{e.stopPropagation();openApp(dockPh);setTimeout(()=>phOpen('rec'),180)});
+  dockPh.addEventListener('click',e=>{e.stopPropagation();openApp(dockPh);setTimeout(()=>phOpen('fav'),180)});
 
   /* ===== SANTA CALL =====
      tap the lock-screen CAMERA button = Santa's incoming call. QLab plays one ring pass while the phone is in
@@ -717,7 +725,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const clRing=()=>{if(!call.classList.contains('hide'))return;try{ring.currentTime=0;const p=ring.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}clearInterval(clT);call.classList.remove('live','ended');call.querySelectorAll('.cl-g.on').forEach(g=>g.classList.remove('on'));kdx=0;knob.classList.remove('back');knob.style.transform='';$('cl-stx').style.opacity='';call.classList.remove('hide')};
   const clRecent=missed=>{clN++;const l=$('ph-rlist'),old=l.querySelector('.ph-santa');if(old)old.remove();
     l.insertAdjacentHTML('afterbegin',`<div class="ph-rc ph-santa${missed?' ph-miss':''}"${missed?' data-ph="vm"':''}><div class="ph-av" style="background:#7a1c1c url(santa.jpg) 30% 18%/260% auto"></div><div class="ph-mid"><div class="ph-txt"><div class="ph-nm">Santa Claus${clN>1?' ('+clN+')':''}</div><div class="ph-st">${IN} North Pole</div></div><span class="ph-wh">now</span><span class="ph-i">i</span></div></div>`)};
-  const clHide=()=>{ringStop();clearInterval(clT);call.classList.add('hide');setTimeout(()=>call.classList.remove('live','ended'),320);lockShow()};
+  const clHide=()=>{ringStop();outStop();clearInterval(clT);call.classList.add('hide');setTimeout(()=>call.classList.remove('live','ended'),320);if(outCall){outCall=false;afterOut()}else lockShow()};
   const clAnswer=()=>{ringStop();audio();click();clS=0;$('cl-time').textContent='0:00';call.classList.add('live');clRecent(false);
     clT=setInterval(()=>{clS++;$('cl-time').textContent=Math.floor(clS/60)+':'+String(clS%60).padStart(2,'0')},1000)};
   /* slide to answer: drag the green knob to the right end */
@@ -743,7 +751,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     svT=setTimeout(()=>{const r=santaVM();if(!c1.isConnected||!isLocked())return;const c2=card({title:'Voicemail',body:'Santa Claus · 0:15',icon:VMIC});c2.classList.add('svc');c2.parentNode.insertBefore(c2,c1);ding();
       c2.addEventListener('pointerdown',phPrime,{once:true});openFromCard(c2,()=>phOpen('vm',r))},5000)};
   const cnm=call.querySelector('.cl-in .cl-name');cnm.style.cursor='pointer';cnm.addEventListener('pointerup',e=>{e.stopPropagation();clDecline()});
-  $('cl-end').addEventListener('click',e=>{e.stopPropagation();clearInterval(clT);call.classList.add('ended');$('cl-time').textContent='Call Ended';setTimeout(clHide,1300)});
+  $('cl-end').addEventListener('click',e=>{e.stopPropagation();outStop();clearInterval(clT);call.classList.add('ended');$('cl-time').textContent='Call Ended';setTimeout(clHide,1300)});
   call.querySelectorAll('.cl-g[data-t]').forEach(g=>g.addEventListener('click',e=>{e.stopPropagation();g.classList.toggle('on')}));
   call.addEventListener('pointerdown',e=>e.stopPropagation());call.addEventListener('pointerup',e=>e.stopPropagation());
   const lkCam=document.querySelectorAll('#lk-bot .lkb')[1];
@@ -768,18 +776,41 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     if(txN>1)c.querySelector('.nm').textContent=(txN-1)+' more message'+(txN>2?'s':'');
     lkList.insertBefore(c,$('lk-np').nextSibling);openFromCard(c,()=>msOpen())};
   const msOpen=()=>{$('ms').classList.remove('hide');msBody.scrollTop=1e6};
-  $('ms-who').addEventListener('click',e=>{e.stopPropagation();if(txBusy||txN>=TEXTS.length)return;txBusy=true;audio();
+  $('ms-who').addEventListener('click',e=>{e.stopPropagation();const list=rpOn?REPLIES:TEXTS;if(txBusy||(rpOn?rpN:txN)>=list.length)return;txBusy=true;audio();
     const d=document.createElement('div');d.className='ms-dots';d.innerHTML='<i></i><i></i><i></i>';msBody.appendChild(d);msBody.scrollTop=1e6;
-    setTimeout(()=>{d.remove();const t=TEXTS[txN++];txStamp();txBubble(t);txTone();txBusy=false},1500)});
+    setTimeout(()=>{d.remove();const t=rpOn?REPLIES[rpN++]:TEXTS[txN++];if(!rpOn)txStamp();txBubble(t);txTone();txBusy=false},1500)});
   $('ms-home').addEventListener('click',e=>{e.stopPropagation();lockShow();setTimeout(()=>$('ms').classList.add('hide'),380)});
+  /* ===== CALL SANTA (daycares, no Santa visit) =====
+     Swipe up to unlock -> Phone (dock) opens on Favourites -> tap "Santa Claus".
+     Calling... ring-ring, then Santa's ELF answers (voicemail greeting, santa_greet.mp3), then the jingle beep. Kids yell their message; tap red to hang up.
+     5s later Santa texts back (banner). Tap it = Messages; tap Santa's photo at the top = next reply (typing dots first). */
+  const FAVS=[['Mommy ❤️','mobile','M','#ff8fb1,#e0567f'],['Mrs. Claus','North Pole','MC','#d62b2b,#9e1414'],['Santa Claus','sleigh phone','','',1],['Head Elf','Toy Workshop','HE','#34c759,#1f8f3c'],['The Tooth Fairy','pillow line','TF','#64d2ff,#2a9fd6'],['Wife','home','W','#c084fc,#8b4fd6'],['Frosty Snowman','freezer','FS','#9ad8ff,#58aee0'],['Pineapple Pizza Hotline','work','PP','#ffb340,#f07a00'],['Grandma','home','G','#ff9f0a,#c76f00'],['Easter Bunny','off-season','EB','#bf9cff,#8a63e0'],['Moose (Canadian)','mobile','MO','#8b6b4a,#5c432b']];
+  $('ph-flist').innerHTML=FAVS.map(([n,sub,a,c,sa])=>`<div class="ph-rc ph-fav"${sa?' id="fav-santa"':''}><div class="ph-av" style="background:${sa?'#7a1c1c url(santa.jpg) 30% 18%/260% auto':'linear-gradient('+c+')'}">${a}</div><div class="ph-mid"><div class="ph-txt"><div class="ph-nm">${n}</div><div class="ph-st"><svg viewBox="0 0 24 24" fill="#8a8a8e" style="width:1.6cqh;height:1.6cqh;vertical-align:-.2cqh"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg> ${sub}</div></div><span class="ph-fi">i</span></div></div>`).join('');
+  const out=$('cl-out');let outCall=false,outStage=0,outT=null;
+  out.addEventListener('error',()=>{if(outStage===2){outStage=3;outPlay('vm_beep.mp3');out.onended=null}});
+  const outPlay=src=>{out.src=blobs[src]||src;try{out.currentTime=0}catch(e){}const p=out.play();if(p&&p.catch)p.catch(()=>{})};
+  function outStop(){outStage=0;clearTimeout(outT);try{out.pause()}catch(e){}out.onended=null}
+  const REPLIES=["HO HO HO!! My elf said you called! Was that YOU guys?? That was the LOUDEST Merry Christmas EVER! 🎅","Hold on, I'm checking my list... 📜","...EVERYONE in this room is on the NICE list!! ✅🎉","PS: Did my elf eat my cookies AGAIN?? 🍪😂"];
+  let rpN=0,rpOn=false;
+  $('fav-santa').addEventListener('click',e=>{e.stopPropagation();if(!call.classList.contains('hide'))return;audio();wake();
+    outCall=true;outStage=1;call.querySelectorAll('.cl-g.on').forEach(g=>g.classList.remove('on'));call.classList.remove('ended');call.classList.add('live');$('cl-time').textContent='calling...';call.classList.remove('hide');clRecentOut();
+    outPlay('ringback.mp3');out.onended=()=>{if(outStage!==1)return;outStage=2;clS=0;$('cl-time').textContent='0:00';clearInterval(clT);clT=setInterval(()=>{clS++;$('cl-time').textContent=Math.floor(clS/60)+':'+String(clS%60).padStart(2,'0')},1000);
+      outPlay('santa_greet.mp3');out.onended=()=>{if(outStage!==2)return;outStage=3;outPlay('vm_beep.mp3');out.onended=null}}});
+  const clRecentOut=()=>{const l=$('ph-rlist'),old=l.querySelector('.ph-santa');if(old)old.remove();
+    l.insertAdjacentHTML('afterbegin',`<div class="ph-rc ph-santa"><div class="ph-av" style="background:#7a1c1c url(santa.jpg) 30% 18%/260% auto"></div><div class="ph-mid"><div class="ph-txt"><div class="ph-nm">Santa Claus</div><div class="ph-st">${OUT} sleigh phone</div></div><span class="ph-wh">now</span><span class="ph-i">i</span></div></div>`)};
+  /* after hanging up: back in the Phone app, Santa texts back 5s later */
+  function afterOut(){clearTimeout(outT);outT=setTimeout(()=>{if(rpN>=REPLIES.length)return;rpOn=true;const t=REPLIES[rpN++];if(!txN&&rpN===1)txStamp1();txBubble(t);txTone();
+    document.querySelectorAll('#ban .ln.txc').forEach(c=>c.remove());const c=card({title:'Santa Claus',body:t,icon:TXIC},$('ban'));c.classList.add('txc');
+    openFromCard(c,()=>{ph.classList.add('hide');msOpen()})},5000)}
+  const txStamp1=()=>{const d=new Date();$('ms-ts').innerHTML='iMessage<br>Today '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})};
   /* load the sounds as in-memory files so they play and count time reliably on iPhone */
-  ['mrs_claus_vm.mp3','santa_vm.mp3','santa_ring.mp3'].forEach(src=>fetch(src).then(r=>r.ok?r.blob():null).then(b=>{if(!b)return;blobs[src]=URL.createObjectURL(b);
+  ['mrs_claus_vm.mp3','santa_vm.mp3','santa_ring.mp3','ringback.mp3','santa_greet.mp3','vm_beep.mp3'].forEach(src=>fetch(src).then(r=>r.ok?r.blob():null).then(b=>{if(!b)return;blobs[src]=URL.createObjectURL(b);
     if(src==='santa_ring.mp3'&&ring.paused)ring.src=blobs[src];
     if(phCur&&phCur.dataset.src===src&&phA.paused&&!phA.currentTime){phA.src=blobs[src];try{phA.load()}catch(e){}}}).catch(()=>{}));
   function phReset(){ringStop();clearInterval(clT);clearTimeout(svT);call.classList.add('hide');call.classList.remove('live','ended');clearTimeout(mcT);try{phA.pause();phA.currentTime=0}catch(e){}
     const sv=$('ph-svm');if(sv){if(phCur===sv)phCur=null;sv.remove()}svN=0;clN=0;const rs=document.querySelector('#ph-rlist .ph-santa');if(rs)rs.remove();
     phRow.classList.remove('heard');phSel(phRow);phRow.classList.remove('open');vmBadge();ph.classList.add('hide');
-    txN=0;txBusy=false;msBody.querySelectorAll('.ms-b,.ms-dots').forEach(b=>b.remove());$('ms-ts').innerHTML='iMessage<br>Today';$('ms').classList.add('hide');phDraw()}
+    txN=0;txBusy=false;rpN=0;rpOn=false;outCall=false;outStop();document.querySelectorAll('#ban .ln').forEach(c=>c.remove());msBody.querySelectorAll('.ms-b,.ms-dots').forEach(b=>b.remove());$('ms-ts').innerHTML='iMessage<br>Today';$('ms').classList.add('hide');phDraw()}
   phSel(phRow);phRow.classList.remove('open');
 }
 </script>
