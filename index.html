@@ -668,7 +668,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
      Repeat as often as you like; each call adds Santa to the top of Recents. */
   const call=$('call');let clT=null,clS=0,clN=0;
   const ring=$('cl-ring');const ringStop=()=>{try{ring.pause();ring.currentTime=0}catch(e){}};
-  const clRing=()=>{if(!call.classList.contains('hide'))return;try{ring.currentTime=0;const p=ring.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}clearInterval(clT);call.classList.remove('live','ended');call.querySelectorAll('.cl-g.on').forEach(g=>g.classList.remove('on'));knob.classList.remove('back');knob.style.transform='';$('cl-stx').style.opacity='';call.classList.remove('hide')};
+  const clRing=()=>{if(!call.classList.contains('hide'))return;try{ring.currentTime=0;const p=ring.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}clearInterval(clT);call.classList.remove('live','ended');call.querySelectorAll('.cl-g.on').forEach(g=>g.classList.remove('on'));kdx=0;knob.classList.remove('back');knob.style.transform='';$('cl-stx').style.opacity='';call.classList.remove('hide')};
   const clRecent=()=>{clN++;const l=$('ph-rlist'),old=l.querySelector('.ph-santa');if(old)old.remove();
     l.insertAdjacentHTML('afterbegin',`<div class="ph-rc ph-santa"><div class="ph-av" style="background:#7a1c1c url(santa.jpg) center 20%/cover"></div><div class="ph-mid"><div class="ph-txt"><div class="ph-nm">Santa Claus${clN>1?' ('+clN+')':''}</div><div class="ph-st">${IN} North Pole</div></div><span class="ph-wh">now</span><span class="ph-i">i</span></div></div>`)};
   const clHide=()=>{ringStop();clearInterval(clT);call.classList.add('hide');setTimeout(()=>call.classList.remove('live','ended'),320);lockShow()};
@@ -677,7 +677,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   /* slide to answer: drag the green knob to the right end */
   const knob=$('cl-knob'),track=$('cl-slide');let kx=null,kmax=0,kdx=0;
   const kset=x=>{kdx=Math.max(0,Math.min(kmax,x));knob.style.transform='translateX('+kdx+'px)';$('cl-stx').style.opacity=String(1-kdx/kmax*1.6)};
-  knob.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();knob.classList.remove('back');kmax=track.clientWidth-knob.offsetWidth-knob.offsetLeft*2;kx=e.clientX;try{knob.setPointerCapture(e.pointerId)}catch(_){}});
+  knob.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();knob.classList.remove('back');kdx=0;kmax=track.clientWidth-knob.offsetWidth-knob.offsetLeft*2;kx=e.clientX;try{knob.setPointerCapture(e.pointerId)}catch(_){}});
   knob.addEventListener('pointermove',e=>{if(kx===null)return;kset(e.clientX-kx)});
   const kup=e=>{if(kx===null)return;kx=null;if(kdx>kmax*.8){kset(kmax);clAnswer()}else{knob.classList.add('back');kset(0)}};
   knob.addEventListener('pointerup',kup);knob.addEventListener('pointercancel',kup);
