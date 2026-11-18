@@ -116,6 +116,47 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 #eq i{width:4px;border-radius:2px;background:#c9b8ff;animation:eq .8s ease-in-out infinite}
 #eq i:nth-child(2){animation-delay:.2s}#eq i:nth-child(3){animation-delay:.4s}#eq i:nth-child(4){animation-delay:.1s}
 @keyframes eq{0%,100%{height:25%}50%{height:100%}}
+
+/* ---- lock screen ---- */
+#lock{position:absolute;inset:0;z-index:15;background:#000 url(wallpaper.jpg) center/cover no-repeat;color:#fff;transition:opacity .35s,transform .35s;touch-action:none}
+#lock.hide{opacity:0;transform:translateY(-6%);pointer-events:none}
+#lock::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.28),transparent 35%,transparent 55%,rgba(0,0,0,.45))}
+#lk-top{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 3vh);display:flex;flex-direction:column;align-items:center;z-index:1}
+#lk-pad{width:3vh;height:3vh;margin-bottom:1vh;position:relative}
+#lk-pad svg{position:absolute;inset:0;width:100%;height:100%;transition:opacity .2s,transform .3s}
+#lk-pad .fid{opacity:0;transform:scale(.6)}
+#lock.scan #lk-pad .fid{opacity:1;transform:scale(1.15);animation:fid .45s ease-in-out}
+#lock.scan #lk-pad .pl{opacity:0}
+#lock.open #lk-pad .pl{opacity:1}#lock.open #lk-pad .sh{transform:translate(4px,-2px) rotate(25deg)}
+#lk-pad .sh{transition:transform .25s;transform-origin:16px 11px}
+@keyframes fid{0%{transform:scale(.7)}60%{transform:scale(1.2)}100%{transform:scale(1.15)}}
+#lk-date{font-size:clamp(16px,2.3vh,24px);font-weight:600;text-shadow:0 1px 8px rgba(0,0,0,.4)}
+#lk-time{font-size:clamp(70px,11.5vh,130px);font-weight:700;letter-spacing:-2px;line-height:1;text-shadow:0 2px 14px rgba(0,0,0,.35);cursor:pointer;padding:0 4vw}
+#lk-list{position:absolute;left:3vw;right:3vw;bottom:calc(env(safe-area-inset-bottom,0px) + 15vh);display:flex;flex-direction:column;gap:1vh;z-index:1}
+.ln{display:flex;gap:3vw;align-items:center;padding:1.5vh 3.4vw;border-radius:22px;background:rgba(40,42,48,.72);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);box-shadow:0 .6vh 3vh rgba(0,0,0,.3);animation:lnin .45s cubic-bezier(.2,.9,.25,1.15);cursor:pointer;position:relative}
+@keyframes lnin{from{transform:translateY(40%) scale(.9);opacity:0}}
+.ln>img.ic{width:5vh;height:5vh;border-radius:1.1vh;flex:none}
+.ln .nt{flex:1;min-width:0}
+.ln .nh{display:flex;justify-content:space-between;font-size:clamp(13px,1.7vh,18px);font-weight:700}
+.ln .nh span{color:#c7ccd3;font-weight:500}
+.ln .nb{font-size:clamp(14px,1.9vh,20px);color:#eef0f2;margin-top:.2vh}
+.ln .nm{font-size:clamp(12px,1.5vh,16px);color:#c7ccd3;margin-top:.2vh}
+.ln .th{width:8vh;height:8vh;border-radius:1.2vh;object-fit:cover;flex:none}
+.ln.stack{margin-bottom:1.4vh}
+.ln.stack::after,.ln.stack::before{content:"";position:absolute;left:4%;right:4%;bottom:-1vh;height:2vh;border-radius:0 0 18px 18px;background:rgba(40,42,48,.5);z-index:-1}
+.ln.stack::before{left:8%;right:8%;bottom:-1.9vh;background:rgba(40,42,48,.3)}
+.ln.press{transform:scale(.97)}
+#lk-np{display:none;align-items:center;gap:3vw;padding:1.6vh 4vw;border-radius:22px;background:rgba(40,30,60,.7);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);animation:lnin .45s}
+#lk-np.show{display:flex}
+#lk-np .art{width:6vh;height:6vh;border-radius:1vh;background:linear-gradient(135deg,#c62828,#2e7d32);display:grid;place-items:center;font-size:3vh}
+#lk-np b{display:block;font-size:clamp(15px,2vh,20px)}#lk-np span{color:#d6cfe6;font-size:clamp(13px,1.7vh,17px)}
+#lk-np .eq{margin-left:auto;display:flex;gap:3px;align-items:flex-end;height:2.4vh}
+#lk-np .eq i{width:4px;border-radius:2px;background:#fff;animation:eq .8s ease-in-out infinite}
+#lk-np .eq i:nth-child(2){animation-delay:.2s}#lk-np .eq i:nth-child(3){animation-delay:.4s}
+#lk-bot{position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 3vh);display:flex;justify-content:space-between;padding:0 11vw;z-index:1}
+.lkb{width:6.2vh;height:6.2vh;border-radius:50%;background:rgba(30,30,34,.45);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:grid;place-items:center}
+.lkb svg{width:2.8vh;height:2.8vh}
+#lk-bar{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + .9vh);width:36%;height:.6vh;border-radius:1vh;background:#fff;transform:translateX(-50%);z-index:1}
 #msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2.5vh;background:rgba(13,15,18,.95);color:#fff;font-weight:700;font-size:2.4vh;text-align:center;z-index:9}
 #msg .spin{width:6vh;height:6vh;border-radius:50%;border:.7vh solid rgba(255,255,255,.2);border-top-color:#fff;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -156,6 +197,12 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   <img id="lightsimg" alt="">
   <div id="flash"></div>
   <div id="lightsbar"><div id="lightslbl">Turn on lights</div><div id="lightsbtn" aria-label="Turn on lights"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 21h6v-1H9v1zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2z"/></svg></div></div>
+  <div id="lock">
+    <div id="lk-top"><div id="lk-pad"><svg class="pl" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2" fill="#fff" stroke="none"/><path class="sh" d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><svg class="fid" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3M9 9v1.5M15 9v1.5M12 9v4h-1M9 16c1.6 1.4 4.4 1.4 6 0"/></svg></div><div id="lk-date"></div><div id="lk-time"></div></div>
+    <div id="lk-list"><div id="lk-np"><div class="art">🎄</div><div><b>Jingle Bells</b><span>HomePod · Living Room</span></div><div class="eq"><i></i><i></i><i></i></div></div></div>
+    <div id="lk-bot"><div class="lkb" id="lk-flash"><svg viewBox="0 0 24 24" fill="#fff"><path d="M8 2h8v3l-2 3v12a2 2 0 0 1-2 2h0a2 2 0 0 1-2-2V8L8 5z"/></svg></div><div class="lkb"><svg viewBox="0 0 24 24" fill="#fff"><path d="M9 4l-1.5 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.5L15 4zm3 4.5a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9zm0 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"/></svg></div></div>
+    <div id="lk-bar"></div>
+  </div>
   <div id="notif"><img src="icon.png" alt=""><div class="nt"><div class="nh">Cool House<span>now</span></div><div class="nb" id="notiftxt"></div></div></div>
   <div id="msg"><div class="spin"></div><div id="msgtxt">Reconnecting...</div></div>
 </div>
@@ -183,7 +230,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 
   const $=id=>document.getElementById(id);
   const stage=$('stage'),cam=$('cam'),badge=$('badge'),msg=$('msg');
-  let count=1,part=-1,busy=false,ac=null,cur=null,curTile=null,talkRoom=false,curLights=null,lit=false,curRoom=null;
+  let camOrigin=null,backToLock=false,count=1,part=-1,busy=false,ac=null,cur=null,curTile=null,talkRoom=false,curLights=null,lit=false,curRoom=null;
 
   /* preload every clip so nothing buffers mid-show */
   const norm=c=>typeof c==='string'?{v:c}:c;
@@ -210,7 +257,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const setPod=on=>{$('hpcard').classList.toggle('playing',on);$('hptxt').textContent=on?'Playing · '+SONG:'Paused'};
   /* ---- iPhone-style notification banner: slides down, then away ---- */
   let nT=null;
-  const notify=txt=>{const n=$('notif');$('notiftxt').textContent=txt;n.classList.remove('show');void n.offsetWidth;n.classList.add('show');clearTimeout(nT);nT=setTimeout(()=>n.classList.remove('show'),4000)};
+  const notify=txt=>{if(!$('lock').classList.contains('hide'))return;const n=$('notif');$('notiftxt').textContent=txt;n.classList.remove('show');void n.offsetWidth;n.classList.add('show');clearTimeout(nT);nT=setTimeout(()=>n.classList.remove('show'),4000)};
   $('notif').addEventListener('click',e=>{e.stopPropagation();clearTimeout(nT);$('notif').classList.remove('show')});
   /* ---- secret controls on the title: tap = new alert, hold = 99+ finale ---- */
   let holdT=null,held=false;const title=$('title');
@@ -218,7 +265,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   title.addEventListener('pointerup',()=>{clearTimeout(holdT);if(!held)alertNew();else unlockLoud(FINALE.clips)});
   title.addEventListener('pointerleave',()=>clearTimeout(holdT));
   /* hold Home 1.5s = reset badge to 1 */
-  let rT=null,rHeld=false,unT=null;$('homebtn').addEventListener('pointerdown',()=>{audio();rHeld=false;rT=setTimeout(()=>{setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));unlocked=false;fdDone=false;setPod(false);$('doors').classList.remove('unlocked');$('doorstxt').textContent='Locked';flashTile($('homebtn'));rHeld=true;clearTimeout(unT)},1500)});
+  let rT=null,rHeld=false,unT=null;$('homebtn').addEventListener('pointerdown',()=>{audio();rHeld=false;rT=setTimeout(()=>{setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));unlocked=false;fdDone=false;setPod(false);$('doors').classList.remove('unlocked');$('doorstxt').textContent='Locked';flashTile($('homebtn'));rHeld=true;fullReset();clearTimeout(unT)},1500)});
   $('homebtn').addEventListener('pointerup',()=>{clearTimeout(rT);if(!rHeld&&!unlocked){clearTimeout(unT);unT=setTimeout(()=>{if(!unlocked)setDoor(true)},3000)}});
 
   /* ---- open a camera: zoom out of its tile ---- */
@@ -235,7 +282,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     Object.values(vids).forEach(v=>{v.pause();v.onended=null;v.classList.remove('on')});
     unlockLoud(clips.map((c,k)=>k?c:Object.assign({},c,{v:null})));
     const first=vids[clips[0].v];first.currentTime=0;first.classList.add('on');
-    cam.classList.remove('zoom');cam.style.display='block';cam.style.transform=tileXf(tile);cam.style.borderRadius='6%';
+    cam.classList.remove('zoom');cam.style.display='block';cam.style.transform=tileXf(camOrigin||tile);cam.style.borderRadius='6%';camOrigin=null;
     requestAnimationFrame(()=>requestAnimationFrame(()=>{cam.classList.add('zoom');cam.style.transform='none';cam.style.borderRadius='0'}));
     $('camtop').querySelector('.pill').style.visibility='';
     setTimeout(()=>{playPart(0);busy=false;$('close').classList.add('show');$('camtop').classList.add('show');$('talkbar').classList.toggle('show',talkRoom);$('lightsbar').classList.toggle('show',!talkRoom)},470);
@@ -260,7 +307,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     if(!curLights){click();return}
     lit=true;click();Object.values(vids).forEach(v=>{v.pause();v.onended=null});showLit();autoClose(3000);$('lightsbtn').classList.add('lit');$('lightslbl').textContent='Lights on'});
   $('lightsbar').addEventListener('click',e=>e.stopPropagation());
-  const closeCam=()=>{if(cam.style.display!=='block')return;clearTimeout(litT);busy=true;$('lightsimg').classList.remove('on');lit=false;['close','camtop','talkbar','lightsbar'].forEach(id=>$(id).classList.remove('show'));Object.values(vids).forEach(v=>{v.pause();v.onended=null});cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false;},470)};
+  const closeCam=()=>{if(cam.style.display!=='block')return;clearTimeout(litT);busy=true;$('lightsimg').classList.remove('on');lit=false;['close','camtop','talkbar','lightsbar'].forEach(id=>$(id).classList.remove('show'));Object.values(vids).forEach(v=>{v.pause();v.onended=null});if(backToLock){backToLock=false;lockShow();setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false;},420);return}cam.style.transform=tileXf(curTile);cam.style.borderRadius='6%';setTimeout(()=>{cam.style.display='none';cam.classList.remove('zoom');part=-1;busy=false;},470)};
   $('close').addEventListener('click',e=>{e.stopPropagation();if(!busy)closeCam()});
 
   /* ---- Talk button: hold while speaking, let go to play the next part (quick taps are ignored) ---- */
@@ -275,7 +322,53 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   let unlocked=false,fdDone=false;
   const setDoor=u=>{unlocked=u;const d=$('doors');d.classList.toggle('unlocked',u);$('doorstxt').textContent=u?'Unlocked':'Locked';
     if(u){ding();$('alerttxt').textContent='Front Door was unlocked';flashAlert();notify('Front Door was unlocked')}};
-  $('doors').addEventListener('click',()=>{audio();if(unlocked){click();setDoor(false);$('alerttxt').textContent='Front Door locked'}});
+  $('doors').addEventListener('click',()=>{audio();if(unlocked){click();setDoor(false);$('alerttxt').textContent='Front Door locked';if(doorFromLock){doorFromLock=false;setTimeout(lockShow,2200)}}});
+
+  /* ===== LOCK SCREEN (dog wallpaper, Face ID, notifications) =====
+     Secret controls on the lock screen:
+       tap the clock      = next notification in SEQ order
+       hold the clock     = HomePod plays + 99+ notifications pile up (tap it for the dance party)
+       swipe up           = Face ID unlock to the Cool House home screen
+       hold flashlight 1.5s = reset everything for the next show
+  */
+  const SEQ=['fd','ki','door','lr','of'];
+  let seqI=0,doorFromLock=false,lkBusy=false;
+  const lock=$('lock'),lkList=$('lk-list');
+  const tick=()=>{const d=new Date();$('lk-time').textContent=d.getHours()%12||12;$('lk-time').textContent+=':'+String(d.getMinutes()).padStart(2,'0');$('lk-date').textContent=d.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric'})};
+  tick();setInterval(tick,5000);
+  function lockShow(){lock.classList.remove('hide','scan','open');lkBusy=false}
+  const faceId=done=>{if(lkBusy)return;lkBusy=true;lock.classList.add('scan');setTimeout(()=>{lock.classList.remove('scan');lock.classList.add('open');click()},480);setTimeout(()=>{done();lock.classList.add('hide');lkBusy=false},850)};
+  const card=(o)=>{const c=document.createElement('div');c.className='ln'+(o.stack?' stack':'');c.innerHTML=`<img class="ic" src="icon.png" alt=""><div class="nt"><div class="nh">Cool House<span>now</span></div><div class="nb"><b>${o.title}</b>${o.body?' · '+o.body:''}</div>${o.more?'<div class="nm"></div>':''}</div>${o.thumb?`<img class="th" src="${o.thumb}" alt="">`:''}`;lkList.appendChild(c);return c};
+  const clearCards=()=>lkList.querySelectorAll('.ln').forEach(c=>c.remove());
+  const openFromCard=(c,fn)=>{c.addEventListener('click',e=>{e.stopPropagation();if(lkBusy)return;audio();wake();c.classList.add('press');faceId(()=>{const r=c.getBoundingClientRect();clearCards();fn(c,r)})})};
+  const roomFromLock=(id,rect)=>{const r=ROOMS[id];const t=$(id);if(!r.clips.length)return;backToLock=true;camOrigin={getBoundingClientRect:()=>rect};openCam(t,r.clips,r.talk,r.name,r.lights)};
+  /* unlock the room's videos with sound while still inside the tap */
+  const preUnlock=id=>{const r=ROOMS[id];if(r&&r.clips.length)unlockLoud(r.clips)};
+  const nextAlert=()=>{
+    while(seqI<SEQ.length&&SEQ[seqI]!=='door'&&offline.has(SEQ[seqI]))seqI++;
+    if(seqI>=SEQ.length)return;const id=SEQ[seqI++];clearCards();ding();setBadge(count+1);
+    if(id==='door'){const c=card({title:'Front Door',body:'Unlocked'});openFromCard(c,()=>{doorFromLock=true;setTimeout(()=>setDoor(true),350)});return}
+    const r=ROOMS[id];const c=card({title:r.name,body:'Motion detected',thumb:$(id).querySelector('img').getAttribute('src')});
+    c.addEventListener('pointerdown',()=>preUnlock(id),{once:true});
+    openFromCard(c,(el,rect)=>roomFromLock(id,rect));
+  };
+  const lockFinale=()=>{if(lkBusy)return;clearCards();setPod(true);$('lk-np').classList.add('show');ding();
+    setTimeout(()=>{const c=card({title:'Living Room',body:'Motion detected',thumb:'tile_lr.jpg',stack:true,more:true});let n=1;const m=c.querySelector('.nm');
+      const step=()=>{n+=n<10?1:n<30?3:9;if(n>=99){m.textContent='99+ more notifications';setBadge(100);ding();return}m.textContent=n+' more notifications';setBadge(n);ding();setTimeout(step,Math.max(70,260-n*4))};step();
+      c.addEventListener('pointerdown',()=>unlockLoud(FINALE.clips),{once:true});
+      openFromCard(c,(el,rect)=>{$('lk-np').classList.remove('show');backToLock=true;camOrigin={getBoundingClientRect:()=>rect};openCam($(FINALE.tile),FINALE.clips,false,ROOMS[FINALE.tile].name,FINALE.lights)})},1600)};
+  /* clock: tap = next alert, hold = finale */
+  let ckT=null,ckHeld=false;const ck=$('lk-time');
+  ck.addEventListener('pointerdown',e=>{e.stopPropagation();audio();wake();ckHeld=false;ckT=setTimeout(()=>{ckHeld=true;lockFinale()},800)});
+  ck.addEventListener('pointerup',e=>{e.stopPropagation();clearTimeout(ckT);if(!ckHeld)nextAlert()});
+  ck.addEventListener('pointerleave',()=>clearTimeout(ckT));
+  /* swipe up = Face ID to home screen */
+  let lsy=null;lock.addEventListener('pointerdown',e=>{lsy=e.clientY});
+  lock.addEventListener('pointerup',e=>{if(lsy!==null&&lsy-e.clientY>90)faceId(()=>{});lsy=null});
+  /* hold flashlight = full reset */
+  let flT=null;$('lk-flash').addEventListener('pointerdown',e=>{e.stopPropagation();flT=setTimeout(()=>{fullReset();click()},1500)});
+  $('lk-flash').addEventListener('pointerup',()=>clearTimeout(flT));
+  function fullReset(){seqI=0;doorFromLock=false;clearCards();$('lk-np').classList.remove('show');setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));unlocked=false;fdDone=false;setPod(false);$('doors').classList.remove('unlocked');$('doorstxt').textContent='Locked';lockShow()}
   /* ---- swipe down to close; in tap rooms, tap = next clip, tap after last = back home ---- */
   let sy=null,swiped=false;
   cam.addEventListener('touchstart',e=>{sy=e.touches[0].clientY;swiped=false},{passive:true});
