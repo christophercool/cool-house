@@ -468,7 +468,11 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   if('serviceWorker' in navigator&&location.protocol==='https:'){const hadCtl=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').then(r=>{try{r.update()}catch(e){}}).catch(()=>{});navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadCtl&&!window.__rl){window.__rl=1;location.reload()}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{})})}
 
   /* keep the screen awake where allowed */
-  const wake=()=>{try{navigator.wakeLock&&navigator.wakeLock.request('screen').catch(()=>{})}catch(e){}};
+  /* keep the screen awake the whole time the app is open (no Auto-Lock change needed).
+     iPhone only allows it after a tap, and drops it when the app is hidden, so ask again on every tap and on return. */
+  let wl=null;const wake=()=>{try{if(wl&&!wl.released)return;navigator.wakeLock&&navigator.wakeLock.request('screen').then(l=>{wl=l;l.addEventListener('release',()=>{wl=null})}).catch(()=>{})}catch(e){}};
+  document.addEventListener('pointerdown',wake,{capture:true,passive:true});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')wake()});
 
   /* ---- sound: two-note phone chime ---- */
   const audio=()=>{try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}return ac};
