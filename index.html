@@ -81,6 +81,11 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 #lightsbtn svg{width:5vh;height:5vh}
 @keyframes lp{50%{box-shadow:0 .8vh 3vh rgba(0,0,0,.55),0 0 5vh rgba(255,210,63,.8)}}
 #lightslbl{color:#fff;font-weight:700;font-size:2vh;text-shadow:0 1px 6px #000}
+.tile.off img{opacity:0}.tile.off{background:#000}
+.tile.off .pill{background:#3a3f47}.tile.off .pill i{display:none;animation:none}
+.tile .offtxt{display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:.8vh;color:#9aa3ad;font-weight:700;font-size:clamp(13px,1.8vh,18px);z-index:1}
+.tile.off .offtxt{display:flex}
+.tile .offtxt svg{width:4vh;height:4vh}
 #msg{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:2.5vh;background:rgba(13,15,18,.95);color:#fff;font-weight:700;font-size:2.4vh;text-align:center;z-index:9}
 #msg .spin{width:6vh;height:6vh;border-radius:50%;border:.7vh solid rgba(255,255,255,.2);border-top-color:#fff;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -102,7 +107,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
       <div class="tile" id="fd"><img src="tile_fd.jpg" alt=""><div class="pill"><i></i>LIVE</div><span>Front Door</span></div>
       <div class="tile" id="ki"><img src="tile_ki.jpg" alt=""><div class="pill"><i></i>LIVE</div><span>Kitchen</span></div>
       <div class="tile" id="lr"><img src="tile_lr.jpg" alt=""><div class="pill"><i></i>LIVE</div><span>Living Room</span></div>
-      <div class="tile" id="of"><img src="tile_of.jpg" alt=""><div class="pill"><i></i>LIVE</div><span>Office</span></div>
+      <div class="tile" id="of"><img src="tile_of.jpg" alt=""><div class="pill"><i></i><b class="pt">LIVE</b></div><div class="offtxt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l18 18M15 10l5-3v10l-2-1.2M13 17H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1m4 0h3a2 2 0 0 1 2 2v3"/></svg>Camera offline</div><span>Office</span></div>
     </div>
     <nav id="tabs">
       <div class="tab on" id="homebtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</div>
@@ -137,14 +142,14 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     ]},
     ki:{name:'Kitchen',    clips:['ki1.mp4'], lights:'ki_lights.jpg'},              // cookie thief, freezes hugging a cookie
     lr:{name:'Living Room',clips:['lr1.mp4'], lights:'lr_lights.jpg'},              // couch trampoline, flips, lands like a starfish
-    of:{name:'Office',     clips:['of1.mp4']}               // moustache on Christopher's photo, pulls the plug, CAMERA OFFLINE
+    of:{name:'Office',     clips:['of1.mp4'], goesOffline:true}               // moustache on Christopher's photo, pulls the plug, CAMERA OFFLINE
   };
   /* finale: plays after the 99+ count, zooming out of this tile */
   const FINALE={tile:'lr', clips:['finale.mp4']};
 
   const $=id=>document.getElementById(id);
   const stage=$('stage'),cam=$('cam'),badge=$('badge'),msg=$('msg');
-  let count=1,part=-1,busy=false,ac=null,cur=null,curTile=null,talkRoom=false,curLights=null,lit=false;
+  let count=1,part=-1,busy=false,ac=null,cur=null,curTile=null,talkRoom=false,curLights=null,lit=false,curRoom=null;
 
   /* preload every clip so nothing buffers mid-show */
   const norm=c=>typeof c==='string'?{v:c}:c;
@@ -173,7 +178,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   title.addEventListener('pointerup',()=>{clearTimeout(holdT);if(!held)alertNew()});
   title.addEventListener('pointerleave',()=>clearTimeout(holdT));
   /* hold Home 1.5s = reset badge to 1 */
-  let rT=null;$('homebtn').addEventListener('pointerdown',()=>{rT=setTimeout(()=>{setBadge(1);$('alerttxt').textContent='Motion detected at your house'},1500)});
+  let rT=null;$('homebtn').addEventListener('pointerdown',()=>{rT=setTimeout(()=>{setBadge(1);$('alerttxt').textContent='Motion detected at your house';[...offline].forEach(id=>setOffline(id,false));flashTile($('homebtn'))},1500)});
   $('homebtn').addEventListener('pointerup',()=>clearTimeout(rT));
 
   /* ---- open a camera: zoom out of its tile ---- */
@@ -184,7 +189,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const openCam=(tile,clips,talk,name,lights)=>{
     if(busy)return;busy=true;audio();wake();flashTile(tile);
     curLights=lights||null;lit=false;$('lightsimg').classList.remove('on');$('lightsbar').classList.remove('show');if(curLights)$('lightsimg').src=curLights;
-    cur=clips;curTile=tile;talkRoom=!!talk;$('camname').textContent=name||'';
+    cur=clips;curTile=tile;talkRoom=!!talk;curRoom=tile.id;$('camname').textContent=name||'';
     Object.values(vids).forEach(v=>{v.pause();v.onended=null;v.classList.remove('on')});
     prime(clips);
     const first=vids[clips[0].v];first.currentTime=0;first.classList.add('on');
@@ -199,7 +204,9 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     v.addEventListener('playing',swap);
     const p=v.play();if(p&&p.catch)p.catch(()=>v.removeEventListener('playing',swap));
   };
-  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part!==i)return;if(c.idle)playSrc(c.idle,true);else if(i===cur.length-1&&curLights&&!lit)$('lightsbar').classList.add('show')};playSrc(c.v,false)};
+  const offline=new Set();
+  const setOffline=(id,on)=>{const t=$(id);if(!t)return;t.classList.toggle('off',on);const pt=t.querySelector('.pt');if(pt)pt.textContent=on?'OFFLINE':'LIVE';on?offline.add(id):offline.delete(id)};
+  const playPart=i=>{part=i;const c=cur[i];const v=vids[c.v];v.onended=()=>{if(part!==i)return;if(i===cur.length-1&&curRoom&&ROOMS[curRoom].goesOffline)setOffline(curRoom,true);if(c.idle)playSrc(c.idle,true);else if(i===cur.length-1&&curLights&&!lit)$('lightsbar').classList.add('show')};playSrc(c.v,false)};
   /* LIGHTS: click sound, flash, room lit up with the elf caught frozen */
   const click=()=>{const a=audio();if(!a)return;const t=a.currentTime;const b=a.createBuffer(1,a.sampleRate*.04,a.sampleRate),d=b.getChannelData(0);for(let k=0;k<d.length;k++)d[k]=(Math.random()*2-1)*Math.pow(1-k/d.length,6);const s=a.createBufferSource(),g=a.createGain();g.gain.value=.9;s.buffer=b;s.connect(g).connect(a.destination);s.start(t)};
   $('lightsbtn').addEventListener('click',e=>{e.stopPropagation();if(lit)return;lit=true;click();$('lightsbar').classList.remove('show');const f=$('flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go');$('lightsimg').classList.add('on')});
@@ -220,8 +227,9 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   cam.addEventListener('touchmove',e=>{if(sy!==null&&e.touches[0].clientY-sy>70&&!swiped&&!busy){swiped=true;closeCam()}},{passive:true});
   cam.addEventListener('click',()=>{if(swiped){swiped=false;return}if(busy||!cur||talkRoom)return;const pv=vids[cur[part].v];if(pv&&!pv.ended)return;if(curLights&&!lit&&part===cur.length-1)return;if(part<cur.length-1)playPart(part+1);else closeCam()});
 
+  const offlineMsg=(tile,name)=>{flashTile(tile);$('msgtxt').textContent=name+' camera is offline';msg.querySelector('.spin').style.display='none';msg.style.display='flex';setTimeout(()=>{msg.style.display='none';msg.querySelector('.spin').style.display=''},2200)};
   const reconnecting=(tile,name)=>{flashTile(tile);$('msgtxt').textContent=name+' camera: Reconnecting...';msg.style.display='flex';setTimeout(()=>msg.style.display='none',2200)};
-  Object.entries(ROOMS).forEach(([id,r])=>{const t=$(id);t.addEventListener('click',()=>r.clips.length?openCam(t,r.clips,r.talk,r.name,r.lights):reconnecting(t,r.name))});
+  Object.entries(ROOMS).forEach(([id,r])=>{const t=$(id);t.addEventListener('click',()=>offline.has(id)?offlineMsg(t,r.name):r.clips.length?openCam(t,r.clips,r.talk,r.name,r.lights):reconnecting(t,r.name))});
   msg.addEventListener('click',()=>msg.style.display='none');
 }
 </script>
