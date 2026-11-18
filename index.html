@@ -251,6 +251,12 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 .cl-in,.cl-live{position:absolute;inset:0;display:none}
 #call:not(.live) .cl-in,#call.live .cl-live{display:block}
 .cl-row{position:absolute;left:12cqw;right:12cqw;bottom:9cqh;display:flex;justify-content:space-between;z-index:1}
+#cl-slide{position:absolute;left:7cqw;right:7cqw;bottom:9cqh;height:9.6cqh;border-radius:4.8cqh;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(20px) saturate(170%);-webkit-backdrop-filter:blur(20px) saturate(170%);z-index:1;touch-action:none}
+#cl-knob{position:absolute;left:.7cqh;top:.7cqh;width:8.2cqh;height:8.2cqh;border-radius:50%;background:#30d158;display:grid;place-items:center;box-shadow:0 .6cqh 2cqh rgba(0,0,0,.3);z-index:2}
+#cl-knob.back{transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+#cl-knob svg{width:46%;height:46%}
+#cl-stx{position:absolute;inset:0;display:grid;place-items:center;padding-left:8cqh;font-size:clamp(17px,2.5cqh,25px);font-weight:500;color:transparent;background:linear-gradient(90deg,rgba(255,255,255,.55) 0%,rgba(255,255,255,.55) 40%,#fff 50%,rgba(255,255,255,.55) 60%,rgba(255,255,255,.55) 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;animation:shim 2.4s linear infinite;pointer-events:none}
+@keyframes shim{from{background-position:100% 0}to{background-position:-150% 0}}
 .cl-b{display:grid;justify-items:center;gap:1cqh;font-size:clamp(13px,1.8cqh,18px);font-weight:500;cursor:pointer}
 .cl-c{width:9.4cqh;height:9.4cqh;border-radius:50%;display:grid;place-items:center;box-shadow:0 1cqh 3cqh rgba(0,0,0,.35)}
 .cl-c svg{width:44%;height:44%}
@@ -356,10 +362,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     <div class="cl-in">
       <div class="cl-top"><div class="cl-sub">incoming call</div><div class="cl-name">Santa Claus</div><div class="cl-sub">North Pole</div></div>
       <div class="cl-mini"><div><span><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>Remind Me</div><div><span><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.4 1.3 4.6 3.4 6-.2 1.3-.8 2.6-1.8 3.6 2 0 3.8-.8 5-1.9 1.1.3 2.2.4 3.4.4 5.5 0 10-3.6 10-8s-4.5-8-10-8z"/></svg></span>Message</div></div>
-      <div class="cl-row">
-        <div class="cl-b" id="cl-dec"><div class="cl-c cl-red"><svg viewBox="0 0 24 24" fill="#fff" style="transform:rotate(135deg)"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></div>Decline</div>
-        <div class="cl-b" id="cl-acc"><div class="cl-c cl-grn"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></div>Accept</div>
-      </div>
+      <div id="cl-slide"><div id="cl-stx">slide to answer</div><div id="cl-knob"><svg viewBox="0 0 24 24" fill="#fff"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></div></div>
     </div>
     <div class="cl-live">
       <div class="cl-top"><div class="cl-av"></div><div class="cl-name">Santa Claus</div><div class="cl-sub" id="cl-time">0:00</div></div>
@@ -661,17 +664,25 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   /* ===== SANTA CALL =====
      tap the lock-screen CAMERA button = Santa's incoming call. QLab plays one ring pass while the phone is in
      the pocket; the app keeps ringing the same jingle (santa_ring.mp3, through NDI) until Accept or Decline.
-     Accept = in-call screen with timer; End = "Call Ended", back to the lock screen.
+     Slide to answer = in-call screen with timer (hold Santa's name 1.5s = dismiss without answering); End = "Call Ended", back to the lock screen.
      Repeat as often as you like; each call adds Santa to the top of Recents. */
   const call=$('call');let clT=null,clS=0,clN=0;
   const ring=$('cl-ring');const ringStop=()=>{try{ring.pause();ring.currentTime=0}catch(e){}};
-  const clRing=()=>{if(!call.classList.contains('hide'))return;try{ring.currentTime=0;const p=ring.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}clearInterval(clT);call.classList.remove('live','ended');call.querySelectorAll('.cl-g.on').forEach(g=>g.classList.remove('on'));call.classList.remove('hide')};
+  const clRing=()=>{if(!call.classList.contains('hide'))return;try{ring.currentTime=0;const p=ring.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}clearInterval(clT);call.classList.remove('live','ended');call.querySelectorAll('.cl-g.on').forEach(g=>g.classList.remove('on'));knob.classList.remove('back');knob.style.transform='';$('cl-stx').style.opacity='';call.classList.remove('hide')};
   const clRecent=()=>{clN++;const l=$('ph-rlist'),old=l.querySelector('.ph-santa');if(old)old.remove();
     l.insertAdjacentHTML('afterbegin',`<div class="ph-rc ph-santa"><div class="ph-av" style="background:#7a1c1c url(santa.jpg) center 20%/cover"></div><div class="ph-mid"><div class="ph-txt"><div class="ph-nm">Santa Claus${clN>1?' ('+clN+')':''}</div><div class="ph-st">${IN} North Pole</div></div><span class="ph-wh">now</span><span class="ph-i">i</span></div></div>`)};
   const clHide=()=>{ringStop();clearInterval(clT);call.classList.add('hide');setTimeout(()=>call.classList.remove('live','ended'),320);lockShow()};
-  $('cl-acc').addEventListener('click',e=>{e.stopPropagation();ringStop();audio();click();clS=0;$('cl-time').textContent='0:00';call.classList.add('live');clRecent();
-    clT=setInterval(()=>{clS++;$('cl-time').textContent=Math.floor(clS/60)+':'+String(clS%60).padStart(2,'0')},1000)});
-  $('cl-dec').addEventListener('click',e=>{e.stopPropagation();clHide()});
+  const clAnswer=()=>{ringStop();audio();click();clS=0;$('cl-time').textContent='0:00';call.classList.add('live');clRecent();
+    clT=setInterval(()=>{clS++;$('cl-time').textContent=Math.floor(clS/60)+':'+String(clS%60).padStart(2,'0')},1000)};
+  /* slide to answer: drag the green knob to the right end */
+  const knob=$('cl-knob'),track=$('cl-slide');let kx=null,kmax=0,kdx=0;
+  const kset=x=>{kdx=Math.max(0,Math.min(kmax,x));knob.style.transform='translateX('+kdx+'px)';$('cl-stx').style.opacity=String(1-kdx/kmax*1.6)};
+  knob.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();knob.classList.remove('back');kmax=track.clientWidth-knob.offsetWidth-knob.offsetLeft*2;kx=e.clientX;try{knob.setPointerCapture(e.pointerId)}catch(_){}});
+  knob.addEventListener('pointermove',e=>{if(kx===null)return;kset(e.clientX-kx)});
+  const kup=e=>{if(kx===null)return;kx=null;if(kdx>kmax*.8){kset(kmax);clAnswer()}else{knob.classList.add('back');kset(0)}};
+  knob.addEventListener('pointerup',kup);knob.addEventListener('pointercancel',kup);
+  /* hidden way out without answering: hold Santa's name 1.5s */
+  let clxT=null;const cnm=call.querySelector('.cl-in .cl-name');cnm.addEventListener('pointerdown',()=>{clxT=setTimeout(clHide,1500)});cnm.addEventListener('pointerup',()=>clearTimeout(clxT));
   $('cl-end').addEventListener('click',e=>{e.stopPropagation();clearInterval(clT);call.classList.add('ended');$('cl-time').textContent='Call Ended';setTimeout(clHide,1300)});
   call.querySelectorAll('.cl-g[data-t]').forEach(g=>g.addEventListener('click',e=>{e.stopPropagation();g.classList.toggle('on')}));
   call.addEventListener('pointerdown',e=>e.stopPropagation());call.addEventListener('pointerup',e=>e.stopPropagation());
