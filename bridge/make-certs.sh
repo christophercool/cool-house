@@ -26,6 +26,8 @@ CN=$HOST
 basicConstraints=CA:FALSE
 keyUsage=critical,digitalSignature,keyEncipherment
 extendedKeyUsage=serverAuth
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid,issuer
 subjectAltName=DNS:$HOST,DNS:localhost,IP:127.0.0.1
 CNF
 openssl req -newkey rsa:2048 -nodes -keyout server.key -out server.csr -config srv.cnf -sha256 2>/dev/null

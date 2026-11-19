@@ -11,6 +11,8 @@ MAIN=$(echo $NOW | awk '{print $1}')
 HAVE=$(openssl x509 -in server.crt -noout -text 2>/dev/null | tr ',' '\n' | sed 's/^ *//' | grep '^IP Address:' | sed 's/^IP Address://' | grep -v '^127\.0\.0\.1$')
 NEED=0
 for IP in $NOW; do echo "$HAVE" | grep -qxF "$IP" || NEED=1; done
+# iPhones need the key IDs linking this cert to the trust cert (macOS's LibreSSL leaves them out unless asked).
+openssl x509 -in server.crt -noout -text 2>/dev/null | grep -q "Authority Key Identifier" || NEED=1
 if [ "$NEED" = 1 ]; then
   ALL=$(printf '%s\n' $HAVE $NOW | awk 'NF && !seen[$0]++')
   SAN="DNS:$HOST,DNS:localhost,IP:127.0.0.1"
@@ -25,6 +27,8 @@ CN=$HOST
 basicConstraints=CA:FALSE
 keyUsage=critical,digitalSignature,keyEncipherment
 extendedKeyUsage=serverAuth
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid,issuer
 subjectAltName=$SAN
 CNF
   openssl req -new -key server.key -out server.csr -config srv.cnf -sha256 2>/dev/null &&
