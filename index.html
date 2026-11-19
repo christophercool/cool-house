@@ -877,7 +877,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     const L=brList();if(brI>=L.length)brI=0;const h=L[brI];let sock;
     try{sock=ws=new WebSocket('wss://'+h+':8443/ws')}catch(e){brI++;wsT=setTimeout(brConnect,200);return}
     brSt('Looking for the Mac... ('+h+')');
-    brOpenT=setTimeout(()=>{if(ws===sock&&sock.readyState!==1){try{sock.close()}catch(e){}}},2500);
+    brOpenT=setTimeout(()=>{if(ws===sock&&sock.readyState!==1){try{sock.close()}catch(e){}}},6000);
     sock.onopen=()=>{clearTimeout(brOpenT);wsOk=true;try{localStorage.setItem('chBridgeLast',h)}catch(e){}brSt('Connected to '+h,true)};
     sock.onmessage=e=>brCmd(String(e.data||'').trim().toLowerCase());
     sock.onclose=()=>{if(ws!==sock)return;clearTimeout(brOpenT);const was=wsOk;wsOk=false;

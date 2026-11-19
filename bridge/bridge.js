@@ -16,7 +16,9 @@ const server = https.createServer({ key: fs.readFileSync(path.join(certDir, 'ser
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Access-Control-Allow-Origin': '*' });
   res.end('<meta name="viewport" content="width=device-width"><body style="font:20px -apple-system;padding:30px">✅ Cool House bridge is running.<br><br>Your iPhone trusts this Mac. You can close this page.</body>');
 });
+server.on('tlsClientError', (err, sock) => { console.log(stamp(), '⚠️  A device reached the bridge but the secure handshake failed:', err.code || err.message); });
 server.on('upgrade', (req, sock) => {
+  console.log(stamp(), '📡 Phone is connecting from', (req.socket.remoteAddress || '').replace(/^::ffff:/, ''));
   const key = req.headers['sec-websocket-key'];
   if (!key) return sock.destroy();
   const acc = crypto.createHash('sha1').update(key + '258EAFA5-E914-47DA-95CA-C5AB0DC85B11').digest('base64');
