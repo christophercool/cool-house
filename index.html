@@ -434,7 +434,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   <div id="pg" class="hide" aria-hidden="true"></div>
   <div id="br" class="hide">
     <div class="br-card">
-      <div class="br-h">Show remote (QLab)</div>
+      <div class="br-h">Magic Show Bridge (QLab)</div>
       <div class="br-st" id="br-st">Not connected</div>
       <label class="br-l" for="br-host">Mac address (optional)</label>
       <input id="br-host" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" inputmode="decimal" placeholder="Leave blank: finds the Mac by itself">
@@ -882,7 +882,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     sock.onmessage=e=>brCmd(String(e.data||'').trim().toLowerCase());
     sock.onclose=()=>{if(ws!==sock)return;clearTimeout(brOpenT);const was=wsOk;wsOk=false;
       if(was){brI=0;brSt('Lost the Mac. Reconnecting...');wsT=setTimeout(brConnect,1000);return}
-      brI++;if(brI>=brList().length){brI=0;brSt('Mac not found. Is the bridge running on the same Wi-Fi? Retrying...');wsT=setTimeout(brConnect,3000)}else wsT=setTimeout(brConnect,150)};
+      brI++;if(brI>=brList().length){brI=0;brSt('Mac not found. Is Magic Show Bridge running on the same Wi-Fi? Retrying...');wsT=setTimeout(brConnect,3000)}else wsT=setTimeout(brConnect,150)};
     sock.onerror=()=>{}};
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&(!ws||ws.readyState>1))brConnect()});
   function brOpen(){$('br-host').value=brHost();$('br').classList.remove('hide')}

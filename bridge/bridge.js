@@ -1,4 +1,4 @@
-// Cool House bridge: QLab (OSC over UDP) -> Cool House on the iPhone (secure WebSocket over the show Wi-Fi).
+// Magic Show bridge: QLab (OSC over UDP) -> Cool House on the iPhone (secure WebSocket over the show Wi-Fi).
 // No internet needed. No extra packages needed: just Node.js.
 //
 // QLab Network cue: OSC, destination 127.0.0.1 port 53540, message e.g. /coolhouse/santa
@@ -14,7 +14,7 @@ const stamp = () => new Date().toLocaleTimeString();
 
 const server = https.createServer({ key: fs.readFileSync(path.join(certDir, 'server.key')), cert: fs.readFileSync(path.join(certDir, 'server.crt')) }, (req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Access-Control-Allow-Origin': '*' });
-  res.end('<meta name="viewport" content="width=device-width"><body style="font:20px -apple-system;padding:30px">✅ Cool House bridge is running.<br><br>Your iPhone trusts this Mac. You can close this page.</body>');
+  res.end('<meta name="viewport" content="width=device-width"><body style="font:20px -apple-system;padding:30px">✅ Magic Show Bridge is running.<br><br>Your iPhone trusts this Mac. You can close this page.</body>');
 });
 server.on('upgrade', (req, sock) => {
   const key = req.headers['sec-websocket-key'];
@@ -31,7 +31,7 @@ setInterval(() => send('ping'), 10000);
 server.listen(WSS_PORT, () => {
   let host = os.hostname().replace(/\.local$/, '') + '.local';
   try { host = fs.readFileSync(path.join(certDir, 'host.txt'), 'utf8').trim(); } catch (e) {}
-  console.log('\n🎅 Cool House bridge is running.\n');
+  console.log('\n🎅 Magic Show Bridge is running.\n');
   console.log('   Cool House finds this Mac by itself. (Address, if asked: ' + host + ')');
   console.log('   QLab Network cue (OSC):  127.0.0.1  port ' + OSC_PORT + '  message /coolhouse/santa\n');
   console.log('   Leave this window open during the show.\n');
