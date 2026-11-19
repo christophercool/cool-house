@@ -436,8 +436,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     <div class="br-card">
       <div class="br-h">Show remote (QLab)</div>
       <div class="br-st" id="br-st">Not connected</div>
-      <label class="br-l" for="br-host">Mac name</label>
-      <input id="br-host" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Christophers-MacBook-Pro.local">
+      <label class="br-l" for="br-host">Mac address (optional)</label>
+      <input id="br-host" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" inputmode="decimal" placeholder="Leave blank: finds the Mac by itself">
       <div class="br-row"><button id="br-save">Save and connect</button><button id="br-test">Test trust</button></div>
       <button id="br-pocket" class="br-wide">Pocket mode: off</button>
       <div class="br-note">Pocket mode ignores all touches until QLab sends a cue (or tap the screen 5 times fast).</div>
@@ -859,6 +859,11 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   let ws=null,wsT=null,wsOk=false;
   const brSt=(t,ok)=>{const el=$('br-st');el.textContent=t;el.classList.toggle('ok',!!ok)};
   const brHost=()=>{try{return localStorage.getItem('chBridge')||''}catch(e){return ''}};
+  /* Auto-connect: try the saved address, the last one that worked, then the known show-MacBook addresses. No typing needed. */
+  const BR_KNOWN=['192.168.8.111','Christophers-MacBook-Pro.local','192.168.1.89'];
+  const brLast=()=>{try{return localStorage.getItem('chBridgeLast')||''}catch(e){return ''}};
+  const brList=()=>[brHost(),brLast(),...BR_KNOWN].filter((h,i,a)=>h&&a.indexOf(h)===i);
+  let brI=0,brOpenT=null;
   const brCmd=c=>{wake();const cue=c!=='ping'&&c!=='pocket'&&c!=='unpocket';if(cue)pocket(false);
     if(c==='santa'){if(call.classList.contains('hide'))clRing()}
     else if(c==='mrsclaus')mrsClaus();
@@ -868,18 +873,22 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     else if(c==='reset')fullReset();
     else if(c==='pocket')pocket(true);
     else if(c==='unpocket')pocket(false)};
-  const brConnect=()=>{clearTimeout(wsT);try{if(ws){ws.onclose=null;ws.close()}}catch(e){}ws=null;const h=brHost();if(!h){brSt('Not set up');return}
-    try{ws=new WebSocket('wss://'+h+':8443/ws')}catch(e){brSt('Bad Mac name');return}
-    brSt('Connecting to '+h+'...');
-    ws.onopen=()=>{wsOk=true;brSt('Connected to '+h,true)};
-    ws.onmessage=e=>brCmd(String(e.data||'').trim().toLowerCase());
-    ws.onclose=()=>{wsOk=false;brSt('Not connected. Retrying...');wsT=setTimeout(brConnect,3000)};
-    ws.onerror=()=>{}};
+  const brConnect=()=>{clearTimeout(wsT);clearTimeout(brOpenT);try{if(ws){ws.onclose=null;ws.onopen=null;ws.close()}}catch(e){}ws=null;
+    const L=brList();if(brI>=L.length)brI=0;const h=L[brI];let sock;
+    try{sock=ws=new WebSocket('wss://'+h+':8443/ws')}catch(e){brI++;wsT=setTimeout(brConnect,200);return}
+    brSt('Looking for the Mac... ('+h+')');
+    brOpenT=setTimeout(()=>{if(ws===sock&&sock.readyState!==1){try{sock.close()}catch(e){}}},2500);
+    sock.onopen=()=>{clearTimeout(brOpenT);wsOk=true;try{localStorage.setItem('chBridgeLast',h)}catch(e){}brSt('Connected to '+h,true)};
+    sock.onmessage=e=>brCmd(String(e.data||'').trim().toLowerCase());
+    sock.onclose=()=>{if(ws!==sock)return;clearTimeout(brOpenT);const was=wsOk;wsOk=false;
+      if(was){brI=0;brSt('Lost the Mac. Reconnecting...');wsT=setTimeout(brConnect,1000);return}
+      brI++;if(brI>=brList().length){brI=0;brSt('Mac not found. Is the bridge running on the same Wi-Fi? Retrying...');wsT=setTimeout(brConnect,3000)}else wsT=setTimeout(brConnect,150)};
+    sock.onerror=()=>{}};
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&(!ws||ws.readyState>1))brConnect()});
   function brOpen(){$('br-host').value=brHost();$('br').classList.remove('hide')}
   $('br').addEventListener('pointerdown',e=>e.stopPropagation());$('br').addEventListener('pointerup',e=>e.stopPropagation());
-  $('br-save').addEventListener('click',()=>{const v=$('br-host').value.trim().replace(/^https?:\/\//,'').replace(/[:\/].*$/,'');try{localStorage.setItem('chBridge',v)}catch(e){}brConnect()});
-  $('br-test').addEventListener('click',()=>{const h=$('br-host').value.trim();if(h)window.open('https://'+h+':8443/','_blank')});
+  $('br-save').addEventListener('click',()=>{const v=$('br-host').value.trim().replace(/^https?:\/\//,'').replace(/[:\/].*$/,'');try{if(v)localStorage.setItem('chBridge',v);else localStorage.removeItem('chBridge')}catch(e){}brI=0;wsOk=false;brConnect()});
+  $('br-test').addEventListener('click',()=>{const h=$('br-host').value.trim()||brLast()||BR_KNOWN[0];window.open('https://'+h+':8443/','_blank')});
   $('br-pocket').addEventListener('click',()=>{pocket(pg.classList.contains('hide'));if(!pg.classList.contains('hide'))$('br').classList.add('hide')});
   $('br-close').addEventListener('click',()=>$('br').classList.add('hide'));
   brConnect();

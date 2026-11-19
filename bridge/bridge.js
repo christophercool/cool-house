@@ -1,10 +1,10 @@
 // Cool House bridge: QLab (OSC over UDP) -> Cool House on the iPhone (secure WebSocket over the show Wi-Fi).
 // No internet needed. No extra packages needed: just Node.js.
 //
-// QLab Network cue: OSC, destination 127.0.0.1 port 53535, message e.g. /coolhouse/santa
+// QLab Network cue: OSC, destination 127.0.0.1 port 53540, message e.g. /coolhouse/santa
 // Commands: santa  mrsclaus  text  camera  stop  reset  pocket  unpocket  ping
 const fs = require('fs'), https = require('https'), dgram = require('dgram'), crypto = require('crypto'), os = require('os'), path = require('path');
-const OSC_PORT = 53535, WSS_PORT = 8443;
+const OSC_PORT = 53540, WSS_PORT = 8443;
 const dir = __dirname, certDir = path.join(dir, 'certs');
 const clients = new Set();
 
@@ -32,7 +32,7 @@ server.listen(WSS_PORT, () => {
   let host = os.hostname().replace(/\.local$/, '') + '.local';
   try { host = fs.readFileSync(path.join(certDir, 'host.txt'), 'utf8').trim(); } catch (e) {}
   console.log('\n🎅 Cool House bridge is running.\n');
-  console.log('   In Cool House setup, type this Mac name:   ' + host);
+  console.log('   Cool House finds this Mac by itself. (Address, if asked: ' + host + ')');
   console.log('   QLab Network cue (OSC):  127.0.0.1  port ' + OSC_PORT + '  message /coolhouse/santa\n');
   console.log('   Leave this window open during the show.\n');
 });
