@@ -308,6 +308,15 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 .txic .txb svg{width:70%;height:70%}
 .ph-fav{cursor:pointer}.ph-fav.pick .ph-mid{background:#f2f2f4}
 .ph-fi{flex:none;color:#0a7aff;font:600 2.5cqh Georgia,serif;font-style:italic;width:5cqh;height:5cqh;border-radius:50%;background:#f0f0f2;display:grid;place-items:center}
+#pg{position:absolute;inset:0;z-index:40;background:transparent;touch-action:none}#pg.hide{display:none}
+#br{position:absolute;inset:0;z-index:50;background:rgba(0,0,0,.6);display:grid;place-items:center;font-family:-apple-system,system-ui,sans-serif}#br.hide{display:none}
+.br-card{width:86%;background:#1c1c1e;color:#fff;border-radius:2.4cqh;padding:2.4cqh 5cqw;display:grid;gap:1.2cqh;font-size:clamp(14px,2cqh,19px)}
+.br-h{font-size:clamp(18px,2.6cqh,25px);font-weight:600}.br-st{color:#ff9f0a}.br-st.ok{color:#30d158}
+.br-l{color:#8e8e93;font-size:clamp(12px,1.7cqh,16px)}
+#br-host{font-size:16px;padding:1.2cqh 3cqw;border-radius:1.2cqh;border:0;background:#2c2c2e;color:#fff;width:100%;box-sizing:border-box}
+.br-row{display:flex;gap:2cqw}.br-row button,.br-wide{flex:1;font:inherit;padding:1.3cqh 2cqw;border-radius:1.2cqh;border:0;background:#0a84ff;color:#fff}
+.br-row button+button{background:#2c2c2e}.br-wide{background:#2c2c2e}.br-wide.on{background:#30d158;color:#000}.br-x{background:#3a3a3c}
+.br-note{color:#8e8e93;font-size:clamp(12px,1.6cqh,15px)}
 @media (prefers-reduced-motion:reduce){#cam.zoom{transition:none}}
 </style>
 </head>
@@ -420,6 +429,19 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
         <div class="cl-g"><span><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="5" r="2.3"/><circle cx="12" cy="5" r="2.3"/><circle cx="19" cy="5" r="2.3"/><circle cx="5" cy="12" r="2.3"/><circle cx="12" cy="12" r="2.3"/><circle cx="19" cy="12" r="2.3"/><circle cx="5" cy="19" r="2.3"/><circle cx="12" cy="19" r="2.3"/><circle cx="19" cy="19" r="2.3"/></svg></span>Keypad</div>
       </div>
       <div class="cl-b" id="cl-end"><div class="cl-c cl-red"><svg viewBox="0 0 24 24" fill="#fff" style="transform:rotate(135deg)"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg></div></div>
+    </div>
+  </div>
+  <div id="pg" class="hide" aria-hidden="true"></div>
+  <div id="br" class="hide">
+    <div class="br-card">
+      <div class="br-h">Show remote (QLab)</div>
+      <div class="br-st" id="br-st">Not connected</div>
+      <label class="br-l" for="br-host">Mac name</label>
+      <input id="br-host" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Christophers-MacBook-Pro.local">
+      <div class="br-row"><button id="br-save">Save and connect</button><button id="br-test">Test trust</button></div>
+      <button id="br-pocket" class="br-wide">Pocket mode: off</button>
+      <div class="br-note">Pocket mode ignores all touches until QLab sends a cue (or tap the screen 5 times fast).</div>
+      <button id="br-close" class="br-wide br-x">Done</button>
     </div>
   </div>
   <div id="ban"></div>
@@ -718,8 +740,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     mcT=setTimeout(()=>{if(!c1.isConnected)return;const c2=card({title:'Voicemail',body:'Mrs. Claus · 0:44',icon:VMIC},box);c2.parentNode.insertBefore(c2,c1);ding();if(box)banTimer();
       c2.addEventListener('pointerdown',phPrime,{once:true});openFromCard(c2,()=>phOpen('vm',phRow))},3500)};
   const dt=$('lk-date');
-  dt.addEventListener('pointerdown',e=>e.stopPropagation());
-  dt.addEventListener('pointerup',e=>{e.stopPropagation();audio();wake();mrsClaus()});
+  let dtT=null,dtHeld=false;dt.addEventListener('pointerdown',e=>{e.stopPropagation();dtHeld=false;clearTimeout(dtT);dtT=setTimeout(()=>{dtHeld=true;brOpen()},2000)});dt.addEventListener('pointerleave',()=>clearTimeout(dtT));
+  dt.addEventListener('pointerup',e=>{e.stopPropagation();clearTimeout(dtT);if(dtHeld)return;audio();wake();mrsClaus()});
   /* the Phone icon in the dock opens the Phone app too */
   const dockPh=document.querySelector('#sp-dock .app');
   dockPh.addEventListener('click',e=>{e.stopPropagation();openApp(dockPh);setTimeout(()=>phOpen('fav'),180)});
@@ -825,6 +847,44 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   ['mrs_claus_vm.mp3','santa_vm.mp3','santa_ring.mp3','ringback.mp3','santa_greet.mp3','vm_beep.mp3'].forEach(src=>fetch(src).then(r=>r.ok?r.blob():null).then(b=>{if(!b)return;blobs[src]=URL.createObjectURL(b);
     if(src==='santa_ring.mp3'&&ring.paused)ring.src=blobs[src];
     if(phCur&&phCur.dataset.src===src&&phA.paused&&!phA.currentTime){phA.src=blobs[src];try{phA.load()}catch(e){}}}).catch(()=>{}));
+
+  /* ===== SHOW REMOTE (QLab -> Mac bridge -> this phone, over the show Wi-Fi, no internet) =====
+     Hold the lock-screen DATE 2s = setup (Mac name, pocket mode). Commands from QLab:
+     santa, mrsclaus, text, camera, stop, reset, pocket, unpocket. */
+  const pg=$('pg');let pgTaps=[];
+  const pocket=on=>{pg.classList.toggle('hide',!on);$('br-pocket').classList.toggle('on',on);$('br-pocket').textContent='Pocket mode: '+(on?'on':'off')};
+  const swallow=e=>{e.stopPropagation();e.preventDefault()};
+  ['pointerdown','pointermove','click','touchstart','touchend'].forEach(k=>pg.addEventListener(k,swallow,{passive:false}));
+  pg.addEventListener('pointerup',e=>{swallow(e);const t=Date.now();pgTaps=pgTaps.filter(x=>t-x<1500);pgTaps.push(t);if(pgTaps.length>=5){pgTaps=[];pocket(false)}});
+  let ws=null,wsT=null,wsOk=false;
+  const brSt=(t,ok)=>{const el=$('br-st');el.textContent=t;el.classList.toggle('ok',!!ok)};
+  const brHost=()=>{try{return localStorage.getItem('chBridge')||''}catch(e){return ''}};
+  const brCmd=c=>{wake();const cue=c!=='ping'&&c!=='pocket'&&c!=='unpocket';if(cue)pocket(false);
+    if(c==='santa'){if(call.classList.contains('hide'))clRing()}
+    else if(c==='mrsclaus')mrsClaus();
+    else if(c==='text')santaText();
+    else if(c==='camera')nextAlert();
+    else if(c==='stop'){ringStop();windStop()}
+    else if(c==='reset')fullReset();
+    else if(c==='pocket')pocket(true);
+    else if(c==='unpocket')pocket(false)};
+  const brConnect=()=>{clearTimeout(wsT);try{if(ws){ws.onclose=null;ws.close()}}catch(e){}ws=null;const h=brHost();if(!h){brSt('Not set up');return}
+    try{ws=new WebSocket('wss://'+h+':8443/ws')}catch(e){brSt('Bad Mac name');return}
+    brSt('Connecting to '+h+'...');
+    ws.onopen=()=>{wsOk=true;brSt('Connected to '+h,true)};
+    ws.onmessage=e=>brCmd(String(e.data||'').trim().toLowerCase());
+    ws.onclose=()=>{wsOk=false;brSt('Not connected. Retrying...');wsT=setTimeout(brConnect,3000)};
+    ws.onerror=()=>{}};
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&(!ws||ws.readyState>1))brConnect()});
+  function brOpen(){$('br-host').value=brHost();$('br').classList.remove('hide')}
+  $('br').addEventListener('pointerdown',e=>e.stopPropagation());$('br').addEventListener('pointerup',e=>e.stopPropagation());
+  $('br-save').addEventListener('click',()=>{const v=$('br-host').value.trim().replace(/^https?:\/\//,'').replace(/[:\/].*$/,'');try{localStorage.setItem('chBridge',v)}catch(e){}brConnect()});
+  $('br-test').addEventListener('click',()=>{const h=$('br-host').value.trim();if(h)window.open('https://'+h+':8443/','_blank')});
+  $('br-pocket').addEventListener('click',()=>{pocket(pg.classList.contains('hide'));if(!pg.classList.contains('hide'))$('br').classList.add('hide')});
+  $('br-close').addEventListener('click',()=>$('br').classList.add('hide'));
+  brConnect();
+  /* let the ring play when a cue arrives with no tap: unlock it once on the first touch of the session */
+  document.addEventListener('pointerdown',()=>{[ring,$('cl-wind')].forEach(a=>{try{a.muted=true;const p=a.play();const b=()=>{a.pause();a.currentTime=0;a.muted=false};if(p&&p.then)p.then(b).catch(()=>{a.muted=false});else b()}catch(e){}})},{once:true,capture:true});
   function phReset(){ringStop();try{$('cl-wind').pause()}catch(e){}clearInterval(clT);clearTimeout(svT);call.classList.add('hide');call.classList.remove('live','ended');clearTimeout(mcT);try{phA.pause();phA.currentTime=0}catch(e){}
     const sv=$('ph-svm');if(sv){if(phCur===sv)phCur=null;sv.remove()}svN=0;clN=0;const rs=document.querySelector('#ph-rlist .ph-santa');if(rs)rs.remove();
     phRow.classList.remove('heard');phSel(phRow);phRow.classList.remove('open');vmBadge();ph.classList.add('hide');
