@@ -399,7 +399,6 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
       <div data-ph="vm"><span class="ph-bdg"><svg viewBox="0 0 30 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="8" cy="12" r="5"/><circle cx="22" cy="12" r="5"/><path d="M8 17h14"/></svg></span>Voicemail</div>
     </nav>
     <div id="ph-home"><i></i></div>
-    <audio id="ph-aud" src="mrs_claus_vm.mp3" preload="auto"></audio>
   </div>
   <div id="ms" class="hide">
     <div class="ms-hd"><span class="ms-back"><svg viewBox="0 0 12 20" fill="none" stroke="#0a7aff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L2 10l8 8"/></svg></span>
@@ -410,9 +409,6 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     <div class="ms-home" id="ms-home"><i></i></div>
   </div>
   <div id="call" class="hide">
-    <audio id="cl-ring" src="santa_ring.mp3" preload="auto" loop></audio>
-    <audio id="cl-out" preload="auto"></audio>
-    <audio id="cl-wind" src="santa_vm.mp3" preload="auto" loop></audio>
     <div class="cl-in">
       <div class="cl-top"><div class="cl-sub">incoming call</div><div class="cl-name">Santa Claus</div><div class="cl-sub">North Pole</div></div>
       <div class="cl-mini"><div><span><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>Remind Me</div><div><span><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 3C6.5 3 2 6.6 2 11c0 2.4 1.3 4.6 3.4 6-.2 1.3-.8 2.6-1.8 3.6 2 0 3.8-.8 5-1.9 1.1.3 2.2.4 3.4.4 5.5 0 10-3.6 10-8s-4.5-8-10-8z"/></svg></span>Message</div></div>
@@ -434,7 +430,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   <div id="pg" class="hide" aria-hidden="true"></div>
   <div id="br" class="hide">
     <div class="br-card">
-      <div class="br-h">Show remote (QLab)</div>
+      <div class="br-h">Show remote (QLab) <span style="color:#8e8e93;font-weight:400">v58</span></div>
       <div class="br-st" id="br-st">Not connected</div>
       <label class="br-l" for="br-host">Mac address (optional)</label>
       <input id="br-host" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" inputmode="decimal" placeholder="Leave blank: finds the Mac by itself">
@@ -497,7 +493,33 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')wake()});
 
   /* ---- sound: two-note phone chime ---- */
-  const audio=()=>{try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}return ac};
+  const audio=()=>{try{if(navigator.audioSession&&navigator.audioSession.type!=='playback')navigator.audioSession.type='playback'}catch(e){}try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state!=='running')ac.resume()}catch(e){}return ac};
+  /* ===== ALL PHONE SOUNDS PLAY THROUGH WEB AUDIO =====
+     Once any tap wakes the audio engine, every sound (voicemails, rings, ringback, elf greeting, wind) can play
+     instantly, even from a QLab cue with no tap, and the voicemail timer is exact. wa() mimics an <audio> element. */
+  const BUF={},BUFP={};
+  const decode=src=>BUFP[src]||(BUFP[src]=fetch(src).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>new Promise((ok,no)=>audio().decodeAudioData(b,ok,no))).then(b=>BUF[src]=b).catch(e=>{delete BUFP[src];throw e}));
+  function wa(src0,o){o=o||{};const et=new EventTarget();let src=src0||'',node=null,gain=null,st=0,off=0,playing=false,want=false,ended=false,vol=1,muted=false;
+    const fire=k=>{et.dispatchEvent(new Event(k));if(k==='ended'&&typeof P.onended==='function')P.onended()};
+    const kill=()=>{if(node){node.onended=null;try{node.stop()}catch(e){}try{node.disconnect()}catch(e){}node=null}};
+    const buf=()=>BUF[src];
+    const pos=()=>{const b=buf();if(!playing||!b)return off;let t=audio().currentTime-st;if(P.loop)t%=b.duration;return Math.min(t,b.duration)};
+    const start=()=>{const a=audio(),b=buf();if(!a||!b||!want)return;kill();if(off>=b.duration-.02)off=0;ended=false;
+      const n=a.createBufferSource();n.buffer=b;n.loop=!!P.loop;gain=a.createGain();gain.gain.value=muted?0:vol;n.connect(gain);gain.connect(a.destination);
+      n.onended=()=>{if(node!==n)return;node=null;playing=false;want=false;ended=true;off=b.duration;fire('pause');fire('ended')};
+      st=a.currentTime-off;n.start(0,off);node=n;playing=true;fire('play');fire('playing')};
+    const P={loop:!!o.loop,onended:null,
+      get src(){return src},set src(v){kill();playing=false;want=false;src=v||'';off=0;ended=false;if(src)decode(src).then(()=>fire('durationchange')).catch(()=>fire('error'))},
+      load(){if(src)decode(src).then(()=>fire('loadedmetadata')).catch(()=>{})},
+      get paused(){return !want},get ended(){return ended},
+      get duration(){const b=buf();return b?b.duration:NaN},
+      get currentTime(){return pos()},set currentTime(v){const was=want;kill();playing=false;off=Math.max(0,+v||0);ended=false;if(was)start();fire('seeked');fire('timeupdate')},
+      get volume(){return vol},set volume(v){vol=v;if(gain)gain.gain.value=muted?0:vol},
+      get muted(){return muted},set muted(v){muted=!!v;if(gain)gain.gain.value=muted?0:vol},
+      play(){audio();want=true;if(buf()){start();return Promise.resolve()}if(!src){want=false;return Promise.reject(0)}return decode(src).then(()=>{if(want&&!playing)start()},e=>{want=false;fire('error');throw e})},
+      pause(){if(!want)return;off=pos();kill();playing=false;want=false;fire('pause')},
+      addEventListener:(k,f,x)=>et.addEventListener(k,f,x)};
+    return P}
   const ding=()=>{const a=audio();if(!a)return;const t=a.currentTime;[[1318.5,0],[1760,.12]].forEach(([f,d])=>{const o=a.createOscillator(),g=a.createGain();o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.35,t+d+.01);g.gain.exponentialRampToValueAtTime(.001,t+d+.6);o.connect(g).connect(a.destination);o.start(t+d);o.stop(t+d+.65)})};
 
   /* ---- badge + alert banner ---- */
@@ -708,7 +730,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     ['Moose (Canadian)','"Sorry, eh"','Friday',0,'MO','#8b6b4a,#5c432b']
   ];
   $('ph-rlist').innerHTML=CALLS.map(([n,s,w,m,a,c,v])=>`<div class="ph-rc${m?' ph-miss':''}"${v?' data-ph="vm"':''}><div class="ph-av" style="background:linear-gradient(${c})">${a}</div><div class="ph-mid"><div class="ph-txt"><div class="ph-nm">${n}</div><div class="ph-st">${m?IN:OUT} ${s}</div></div><span class="ph-wh">${w}</span><span class="ph-i">i</span></div></div>`).join('');
-  const ph=$('ph'),phA=$('ph-aud'),phRow=$('ph-row'),phPl=document.querySelector('#ph-vm .ph-pl');let phCur=null;
+  const ph=$('ph'),phA=wa(),phRow=$('ph-row'),phPl=document.querySelector('#ph-vm .ph-pl');let phCur=null;
   const blobs={};
   const vmBadge=()=>$('ph-tabs').classList.toggle('heard',!document.querySelector('#ph-vm .ph-vr[data-src]:not(.heard)'));
   /* open one voicemail row: the player moves into it and loads that row's audio */
@@ -735,7 +757,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const phSeek=e=>{const r=$('ph-prog').getBoundingClientRect();phA.currentTime=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width))*phLen();phDraw()};
   $('ph-prog').addEventListener('pointerdown',e=>{e.stopPropagation();phSeek(e);const m=ev=>phSeek(ev),u=()=>{removeEventListener('pointermove',m);removeEventListener('pointerup',u)};addEventListener('pointermove',m);addEventListener('pointerup',u)});
   /* unlock the voicemail audio inside the notification tap so Play works instantly */
-  const phPrime=()=>{try{phA.muted=true;const p=phA.play();const back=()=>{phA.pause();phA.currentTime=0;phA.muted=false;phDraw()};if(p&&p.then)p.then(back).catch(()=>{phA.muted=false});else back()}catch(e){}};
+  const phPrime=()=>{audio()};
   /* lock-screen notifications */
   let mcT=null;
   const mrsClaus=()=>{if(lkBusy)return;clearCards();clearTimeout(mcT);clearTimeout(ofT);const box=isLocked()?null:$('ban');if(box)banTimer();
@@ -758,7 +780,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
        (transcription on screen; audio is only wind + sleigh bells, Santa is never heard).
      Each call adds Santa to the top of Recents (red when ignored). */
   const call=$('call');let clT=null,clS=0,clN=0,svN=0,svT=null;
-  const ring=$('cl-ring');const ringStop=()=>{try{ring.pause();ring.currentTime=0}catch(e){}};
+  const ring=wa('santa_ring.mp3',{loop:true});const ringStop=()=>{try{ring.pause();ring.currentTime=0}catch(e){}};
   const clRing=()=>{if(!call.classList.contains('hide'))return;try{ring.currentTime=0;const p=ring.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}clearInterval(clT);call.classList.remove('live','ended');call.querySelectorAll('.cl-g.on').forEach(g=>g.classList.remove('on'));kdx=0;knob.classList.remove('back');knob.style.transform='';$('cl-stx').style.opacity='';call.classList.remove('hide')};
   const clRecent=missed=>{clN++;const l=$('ph-rlist'),old=l.querySelector('.ph-santa');if(old)old.remove();
     l.insertAdjacentHTML('afterbegin',`<div class="ph-rc ph-santa${missed?' ph-miss':''}"${missed?' data-ph="vm"':''}><div class="ph-av" style="background:#7a1c1c url(santa.jpg) 30% 18%/260% auto"></div><div class="ph-mid"><div class="ph-txt"><div class="ph-nm">Santa Claus${clN>1?' ('+clN+')':''}</div><div class="ph-st">${IN} North Pole</div></div><span class="ph-wh">now</span><span class="ph-i">i</span></div></div>`)};
@@ -823,7 +845,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
      5s later Santa texts back (banner). Tap it = Messages; tap Santa's photo at the top = next reply (typing dots first). */
   const FAVS=[['Mommy ❤️','mobile','M','#ff8fb1,#e0567f'],['Mrs. Claus','North Pole','MC','#d62b2b,#9e1414'],['Santa Claus','sleigh phone','','',1],['Head Elf','Toy Workshop','HE','#34c759,#1f8f3c'],['The Tooth Fairy','pillow line','TF','#64d2ff,#2a9fd6'],['Wife','home','W','#c084fc,#8b4fd6'],['Frosty Snowman','freezer','FS','#9ad8ff,#58aee0'],['Pineapple Pizza Hotline','work','PP','#ffb340,#f07a00'],['Grandma','home','G','#ff9f0a,#c76f00'],['Easter Bunny','off-season','EB','#bf9cff,#8a63e0'],['Moose (Canadian)','mobile','MO','#8b6b4a,#5c432b']];
   $('ph-flist').innerHTML=FAVS.map(([n,sub,a,c,sa])=>`<div class="ph-rc ph-fav"${sa?' id="fav-santa"':''}><div class="ph-av" style="background:${sa?'#7a1c1c url(santa.jpg) 30% 18%/260% auto':'linear-gradient('+c+')'}">${a}</div><div class="ph-mid"><div class="ph-txt"><div class="ph-nm">${n}</div><div class="ph-st"><svg viewBox="0 0 24 24" fill="#8a8a8e" style="width:1.6cqh;height:1.6cqh;vertical-align:-.2cqh"><path d="M6.6 10.8a15 15 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg> ${sub}</div></div><span class="ph-fi">i</span></div></div>`).join('');
-  const out=$('cl-out');let outCall=false,outStage=0,outT=null,outAns=false;
+  const out=wa();let outCall=false,outStage=0,outT=null,outAns=false;
   out.addEventListener('error',()=>{if(outStage===2){outStage=3;outPlay('vm_beep.mp3');out.onended=null}});
   const outPlay=src=>{out.src=blobs[src]||src;try{out.currentTime=0}catch(e){}const p=out.play();if(p&&p.catch)p.catch(()=>{})};
   function outStop(){outStage=0;clearTimeout(outT);try{out.pause()}catch(e){}out.onended=null}
@@ -837,7 +859,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   call.querySelector('.cl-live .cl-top').addEventListener('click',e=>{e.stopPropagation();if(!outCall||outStage!==1)return;outStop();outAns=true;outStage=5;click();
     clS=0;$('cl-time').textContent='0:00';clearInterval(clT);clT=setInterval(()=>{clS++;$('cl-time').textContent=Math.floor(clS/60)+':'+String(clS%60).padStart(2,'0')},1000)});
   /* Speaker on a Santa call = loud wind + sleigh bells ("it's too windy up there!"); tap again to turn it off */
-  const wind=$('cl-wind');const windStop=()=>{try{wind.pause();wind.currentTime=0}catch(e){}};
+  const wind=wa('santa_vm.mp3',{loop:true});const windStop=()=>{try{wind.pause();wind.currentTime=0}catch(e){}};
   const spk=call.querySelector('.cl-g[data-t]');
   spk.addEventListener('click',()=>{if(spk.classList.contains('on')&&call.classList.contains('live')&&!call.classList.contains('ended')&&!(outCall&&outStage>=1&&outStage<=3)){if(blobs['santa_vm.mp3']&&wind.src!==blobs['santa_vm.mp3'])wind.src=blobs['santa_vm.mp3'];try{wind.currentTime=0;wind.volume=1;const p=wind.play();if(p&&p.catch)p.catch(()=>{})}catch(e){}}else windStop()});
   const clRecentOut=()=>{const l=$('ph-rlist'),old=l.querySelector('.ph-santa');if(old)old.remove();
@@ -848,9 +870,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     openFromCard(c,()=>{ph.classList.add('hide');msOpen()})},5000)}
   const txStamp1=()=>{const d=new Date();$('ms-ts').innerHTML='iMessage<br>Today '+d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})};
   /* load the sounds as in-memory files so they play and count time reliably on iPhone */
-  ['mrs_claus_vm.mp3','santa_vm.mp3','santa_ring.mp3','ringback.mp3','santa_greet.mp3','vm_beep.mp3'].forEach(src=>fetch(src).then(r=>r.ok?r.blob():null).then(b=>{if(!b)return;blobs[src]=URL.createObjectURL(b);
-    if(src==='santa_ring.mp3'&&ring.paused)ring.src=blobs[src];
-    if(phCur&&phCur.dataset.src===src&&phA.paused&&!phA.currentTime){phA.src=blobs[src];try{phA.load()}catch(e){}}}).catch(()=>{}));
+  ['mrs_claus_vm.mp3','santa_vm.mp3','santa_ring.mp3','ringback.mp3','santa_greet.mp3','vm_beep.mp3'].forEach(src=>{blobs[src]=src;decode(src).catch(()=>{})});
 
   /* ===== SHOW REMOTE (QLab -> Mac bridge -> this phone, over the show Wi-Fi, no internet) =====
      Hold the lock-screen DATE 2s = setup (Mac name, pocket mode). Commands from QLab:
@@ -868,7 +888,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const brLast=()=>{try{return localStorage.getItem('chBridgeLast')||''}catch(e){return ''}};
   const brList=()=>[brHost(),brLast(),...BR_KNOWN].filter((h,i,a)=>h&&a.indexOf(h)===i);
   let brI=0,brOpenT=null;
-  const brCmd=c=>{wake();const cue=c!=='ping'&&c!=='pocket'&&c!=='unpocket';if(cue)pocket(false);
+  const brCmd=c=>{wake();audio();const cue=c!=='ping'&&c!=='pocket'&&c!=='unpocket';if(cue)pocket(false);
     if(c==='santa'){if(call.classList.contains('hide'))clRing()}
     else if(c==='mrsclaus')mrsClaus();
     else if(c==='text')santaText();
@@ -912,8 +932,8 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   ['pointerup','pointercancel'].forEach(k=>document.addEventListener(k,()=>clearTimeout(tlT),{capture:true,passive:true}));
   document.addEventListener('pointermove',e=>{if(Math.abs(e.clientY-tlY)>20)clearTimeout(tlT)},{capture:true,passive:true});
   /* let the ring play when a cue arrives with no tap: unlock it once on the first touch of the session */
-  document.addEventListener('pointerdown',()=>{[ring,$('cl-wind')].forEach(a=>{try{a.muted=true;const p=a.play();const b=()=>{a.pause();a.currentTime=0;a.muted=false};if(p&&p.then)p.then(b).catch(()=>{a.muted=false});else b()}catch(e){}})},{once:true,capture:true});
-  function phReset(){ringStop();try{$('cl-wind').pause()}catch(e){}clearInterval(clT);clearTimeout(svT);call.classList.add('hide');call.classList.remove('live','ended');clearTimeout(mcT);try{phA.pause();phA.currentTime=0}catch(e){}
+  document.addEventListener('pointerdown',()=>audio(),{capture:true,passive:true});
+  function phReset(){ringStop();try{wind.pause()}catch(e){}clearInterval(clT);clearTimeout(svT);call.classList.add('hide');call.classList.remove('live','ended');clearTimeout(mcT);try{phA.pause();phA.currentTime=0}catch(e){}
     const sv=$('ph-svm');if(sv){if(phCur===sv)phCur=null;sv.remove()}svN=0;clN=0;const rs=document.querySelector('#ph-rlist .ph-santa');if(rs)rs.remove();
     phRow.classList.remove('heard');phSel(phRow);phRow.classList.remove('open');vmBadge();ph.classList.add('hide');
     txN=0;txBusy=false;rpN=0;rpOn=false;outCall=false;outStop();document.querySelectorAll('#ban .ln').forEach(c=>c.remove());msBody.querySelectorAll('.ms-b,.ms-dots').forEach(b=>b.remove());$('ms-ts').innerHTML='iMessage<br>Today';$('ms').classList.add('hide');phDraw()}
