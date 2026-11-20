@@ -430,7 +430,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   <div id="pg" class="hide" aria-hidden="true"></div>
   <div id="br" class="hide">
     <div class="br-card">
-      <div class="br-h">Show remote (QLab) <span style="color:#8e8e93;font-weight:400">v60</span></div>
+      <div class="br-h">Show remote (QLab) <span style="color:#8e8e93;font-weight:400">v61</span></div>
       <div class="br-st" id="br-st">Not connected</div>
       <label class="br-l" for="br-host">Mac address (optional)</label>
       <input id="br-host" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" inputmode="decimal" placeholder="Leave blank: finds the Mac by itself">
@@ -610,7 +610,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
        swipe up           = Face ID unlock to the iPhone home screen; Phone (dock) -> Favourites -> Santa = call Santa's voicemail, he texts back
        hold flashlight 1.5s = reset everything for the next show
   */
-  const SEQ=['fd','door','ki','lr','of'];
+  const SEQ=['fd','door','ki','lr','of','door'];
   let seqI=0,doorFromLock=false,lkBusy=false;
   const lock=$('lock'),lkList=$('lk-list');
   const tick=()=>{const d=new Date();$('lk-time').textContent=d.getHours()%12||12;$('lk-time').textContent+=':'+String(d.getMinutes()).padStart(2,'0');$('lk-date').textContent=d.toLocaleDateString('en-US',{weekday:'short'})+' '+d.toLocaleDateString('en-US',{month:'short'})+' '+d.getDate()};
