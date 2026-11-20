@@ -430,7 +430,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   <div id="pg" class="hide" aria-hidden="true"></div>
   <div id="br" class="hide">
     <div class="br-card">
-      <div class="br-h">Show remote (QLab) <span style="color:#8e8e93;font-weight:400">v58</span></div>
+      <div class="br-h">Show remote (QLab) <span style="color:#8e8e93;font-weight:400">v59</span></div>
       <div class="br-st" id="br-st">Not connected</div>
       <label class="br-l" for="br-host">Mac address (optional)</label>
       <input id="br-host" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" inputmode="decimal" placeholder="Leave blank: finds the Mac by itself">
@@ -649,10 +649,16 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
         setTimeout(()=>{if(finStage!==2)return;setPod(true);$('lk-np').classList.add('show');ding()},1100);return}
       m.textContent=n+' more notifications';setBadge(n);ding();setTimeout(step,Math.max(90,700-k*70))};
     setTimeout(step,400)};
+  /* next camera step, used by the clock tap AND the SOLO camera tag: Front Door, Kitchen, Door, Living Room, Office,
+     then the finale notification, then the pile-up to 99+ (then tap the stack on the phone = dance party) */
+  const camNext=()=>{while(seqI<SEQ.length&&SEQ[seqI]!=='door'&&offline.has(SEQ[seqI]))seqI++;
+    if(seqI<SEQ.length)return nextAlert();
+    if(finStage===1)return finBuild();if(finStage!==0)return;
+    if(isLocked())lockFinale();else{toLock();setTimeout(lockFinale,450)}};
   /* clock: tap = next alert, hold = finale */
   let ckT=null,ckHeld=false;const ck=$('lk-time');
   ck.addEventListener('pointerdown',e=>{e.stopPropagation();audio();wake();ckHeld=false;ckT=setTimeout(()=>{ckHeld=true;lockFinale()},800)});
-  ck.addEventListener('pointerup',e=>{e.stopPropagation();clearTimeout(ckT);if(!ckHeld){if(finStage===1)finBuild();else nextAlert()}});
+  ck.addEventListener('pointerup',e=>{e.stopPropagation();clearTimeout(ckT);if(!ckHeld){if(finStage===1)finBuild();else camNext()}});
   ck.addEventListener('pointerleave',()=>clearTimeout(ckT));
   /* swipe up = Face ID to home screen */
   let lsy=null;lock.addEventListener('pointerdown',e=>{lsy=e.clientY});
@@ -892,8 +898,9 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     if(c==='santa'){if(call.classList.contains('hide'))clRing()}
     else if(c==='mrsclaus')mrsClaus();
     else if(c==='text')santaText();
-    else if(c==='camera')nextAlert();
-    else if(c==='stop'){ringStop();windStop()}
+    else if(c==='camera')camNext();
+    else if(c==='finale'){if(finStage===1)finBuild();else if(!finStage){if(isLocked())lockFinale();else{toLock();setTimeout(lockFinale,450)}}}
+    else if(c==='stop'){ringStop();windStop();outStop();try{phA.pause()}catch(e){}}
     else if(c==='reset')fullReset();
     else if(c==='lock')toLock();
     else if(c==='pocket')pocket(true);
