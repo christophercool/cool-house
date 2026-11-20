@@ -180,7 +180,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
 #ban{position:absolute;left:3cqw;right:3cqw;top:calc(0px + 3.5cqh);z-index:18;display:flex;flex-direction:column;gap:1cqh;pointer-events:none}
 #ban .ln{pointer-events:auto;animation:bin .45s cubic-bezier(.2,.9,.25,1.15)}
 @keyframes bin{from{transform:translateY(-120%);opacity:0}}
-#appbar{position:absolute;left:30%;right:30%;bottom:0;height:3.2cqh;z-index:9;display:flex;align-items:flex-end;justify-content:center;padding-bottom:calc(0px + .8cqh);cursor:pointer;touch-action:none}
+#appbar{position:absolute;left:20%;right:20%;bottom:0;height:7cqh;z-index:9;display:flex;align-items:flex-end;justify-content:center;padding-bottom:calc(0px + .8cqh);cursor:pointer;touch-action:none}
 #stage.camopen #appbar{display:none}
 #appbar i{display:block;width:100%;height:.6cqh;border-radius:1cqh;background:rgba(255,255,255,.85)}
 #home.closing{transition:transform .35s cubic-bezier(.4,0,.6,1),opacity .35s,border-radius .35s;transform:scale(.18);opacity:0;border-radius:40px}
@@ -659,7 +659,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   spTick();setInterval(spTick,5000);
   const openApp=el=>{audio();el.classList.add('pop');setTimeout(()=>{el.classList.remove('pop');spHide()},180)};
   $('sp-ch').addEventListener('click',e=>openApp(e.currentTarget));$('sp-ch2').addEventListener('click',e=>openApp(e.currentTarget));
-  const closeApp=()=>{if(cam.style.display==='block'||busy)return;$('home').classList.add('closing');setTimeout(()=>{lockShow();$('home').classList.remove('closing')},320)};
+  const closeApp=()=>{if(cam.style.display==='block')return;busy=false;$('home').classList.add('closing');setTimeout(()=>{lockShow();$('home').classList.remove('closing')},320)};
   let aby=null;$('appbar').addEventListener('pointerdown',e=>{e.stopPropagation();aby=e.clientY});
   $('appbar').addEventListener('pointerup',e=>{e.stopPropagation();closeApp();aby=null});
   let wT=null,wHeld=false;const wid=$('sp-wid');
@@ -871,6 +871,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
     else if(c==='camera')nextAlert();
     else if(c==='stop'){ringStop();windStop()}
     else if(c==='reset')fullReset();
+    else if(c==='lock')toLock();
     else if(c==='pocket')pocket(true);
     else if(c==='unpocket')pocket(false)};
   const brConnect=()=>{clearTimeout(wsT);clearTimeout(brOpenT);try{if(ws){ws.onclose=null;ws.onopen=null;ws.close()}}catch(e){}ws=null;
@@ -892,6 +893,19 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   $('br-pocket').addEventListener('click',()=>{pocket(pg.classList.contains('hide'));if(!pg.classList.contains('hide'))$('br').classList.add('hide')});
   $('br-close').addEventListener('click',()=>$('br').classList.add('hide'));
   brConnect();
+  /* ===== ALWAYS A WAY BACK TO THE LOCK SCREEN =====
+     1) Leave the app 30s+ and come back = lock screen (like a real iPhone).
+     2) Hold the top of the screen 2s anywhere (not on the lock screen) = lock screen.
+     3) QLab command "lock". */
+  function toLock(){if(!call.classList.contains('hide'))return;pocket(false);$('br').classList.add('hide');
+    try{phA.pause()}catch(e){}
+    if(cam.style.display==='block'){backToLock=true;busy=false;closeCam()}else{busy=false;lockShow()}
+    setTimeout(()=>{ph.classList.add('hide');$('ms').classList.add('hide')},380)}
+  let hidAt=0;document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')hidAt=Date.now();else if(hidAt&&Date.now()-hidAt>30000)toLock()});
+  let tlT=null,tlY=0;
+  document.addEventListener('pointerdown',e=>{clearTimeout(tlT);if(isLocked()||e.clientY>innerHeight*.045)return;tlY=e.clientY;tlT=setTimeout(()=>{click();toLock()},2000)},{capture:true,passive:true});
+  ['pointerup','pointercancel'].forEach(k=>document.addEventListener(k,()=>clearTimeout(tlT),{capture:true,passive:true}));
+  document.addEventListener('pointermove',e=>{if(Math.abs(e.clientY-tlY)>20)clearTimeout(tlT)},{capture:true,passive:true});
   /* let the ring play when a cue arrives with no tap: unlock it once on the first touch of the session */
   document.addEventListener('pointerdown',()=>{[ring,$('cl-wind')].forEach(a=>{try{a.muted=true;const p=a.play();const b=()=>{a.pause();a.currentTime=0;a.muted=false};if(p&&p.then)p.then(b).catch(()=>{a.muted=false});else b()}catch(e){}})},{once:true,capture:true});
   function phReset(){ringStop();try{$('cl-wind').pause()}catch(e){}clearInterval(clT);clearTimeout(svT);call.classList.add('hide');call.classList.remove('live','ended');clearTimeout(mcT);try{phA.pause();phA.currentTime=0}catch(e){}
