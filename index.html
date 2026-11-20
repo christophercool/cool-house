@@ -18,7 +18,7 @@
    LAYOUT: header, status chips, alert, 2x2 camera grid, bottom tab bar; camera zooms out of its tile */
 :root{--bg:#0d0f12;--card:#1a1d22;--line:#2a2e35;--ink:#fff;--mute:#9aa3ad;--red:#ff3b30;--blue:#2f7dff}
 *{box-sizing:border-box;margin:0;min-width:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
-html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touch-action:manipulation;overscroll-behavior:none;position:fixed;inset:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif}
+html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touch-action:pan-x pan-y;overscroll-behavior:none;position:fixed;inset:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif}
 #stage{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);width:100vw;height:min(100vh,calc(100vw * 16 / 9));overflow:hidden;container-type:size;background:#000}
 #home{position:absolute;inset:0;display:flex;flex-direction:column;padding:calc(0px + 5.5cqh) 4.5cqw 0}
 #title{font-size:clamp(30px,4.6cqh,48px);font-weight:800;letter-spacing:-.5px;align-self:flex-start;padding:.4cqh 0;cursor:pointer}
@@ -723,11 +723,15 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   const pf=x=>{x=Math.max(0,Math.round(x||0));return Math.floor(x/60)+':'+String(x%60).padStart(2,'0')};
   const PLAY='<path d="M7 4l14 8-14 8z"/>',PAUSE='<path d="M6 4h4v16H6zM14 4h4v16h-4z"/>';
   const phLen=()=>isFinite(phA.duration)&&phA.duration>0?phA.duration:+((phCur||phRow).dataset.dur||44);
-  const phDraw=()=>{const d=phLen(),c=Math.min(d,phA.currentTime||0),p=c/d*100;$('ph-fill').style.width=p+'%';$('ph-knob').style.left=p+'%';$('ph-cur').textContent=pf(c);$('ph-dur').textContent='-'+pf(d-c);$('ph-ico').innerHTML=phA.paused?PLAY:PAUSE};
-  let phRaf=0;const phLoop=()=>{phDraw();if(!phA.paused&&!phA.ended)phRaf=requestAnimationFrame(phLoop)};
+  let phT0=0,phB=0,phIv=0;
+  const phMark=()=>{phB=phA.currentTime||0;phT0=performance.now()};
+  const phPos=()=>{const c=phA.currentTime||0;if(phA.paused||phA.ended||!phT0)return c;return Math.max(c,phB+(performance.now()-phT0)/1000)};
+  const phDraw=()=>{const d=phLen(),c=Math.min(d,phPos()),p=c/d*100;$('ph-fill').style.width=p+'%';$('ph-knob').style.left=p+'%';$('ph-cur').textContent=pf(c);$('ph-dur').textContent='-'+pf(d-c);$('ph-ico').innerHTML=phA.paused?PLAY:PAUSE};
+  let phRaf=0;const phLoop=()=>{phDraw();clearInterval(phIv);if(!phA.paused&&!phA.ended){phRaf=requestAnimationFrame(phLoop);phIv=setInterval(()=>{if(phA.paused||phA.ended){clearInterval(phIv);phT0=0;phDraw()}else phDraw()},250)}};
   ['timeupdate','loadedmetadata','durationchange','pause','ended','seeked'].forEach(k=>phA.addEventListener(k,phDraw));
-  phA.addEventListener('playing',()=>{cancelAnimationFrame(phRaf);phLoop()});phA.addEventListener('play',()=>{cancelAnimationFrame(phRaf);phLoop()});
-  $('ph-play').addEventListener('click',e=>{e.stopPropagation();if(phA.paused){if(phA.ended||phA.currentTime>=phLen()-.05)phA.currentTime=0;const p=phA.play();if(p&&p.catch)p.catch(()=>{});(phCur||phRow).classList.add('heard');vmBadge();phLoop()}else phA.pause()});
+  phA.addEventListener('playing',()=>{phMark();cancelAnimationFrame(phRaf);phLoop()});phA.addEventListener('play',()=>{phMark();cancelAnimationFrame(phRaf);phLoop()});
+  ['pause','ended','seeked'].forEach(k=>phA.addEventListener(k,()=>{if(k!=='seeked')phT0=0;else if(!phA.paused)phMark()}));
+  $('ph-play').addEventListener('click',e=>{e.stopPropagation();if(phA.paused){if(phA.ended||phA.currentTime>=phLen()-.05)phA.currentTime=0;phMark();const p=phA.play();if(p&&p.catch)p.catch(()=>{});(phCur||phRow).classList.add('heard');vmBadge();phLoop()}else phA.pause()});
   const phSeek=e=>{const r=$('ph-prog').getBoundingClientRect();phA.currentTime=Math.min(1,Math.max(0,(e.clientX-r.left)/r.width))*phLen();phDraw()};
   $('ph-prog').addEventListener('pointerdown',e=>{e.stopPropagation();phSeek(e);const m=ev=>phSeek(ev),u=()=>{removeEventListener('pointermove',m);removeEventListener('pointerup',u)};addEventListener('pointermove',m);addEventListener('pointerup',u)});
   /* unlock the voicemail audio inside the notification tap so Play works instantly */
@@ -893,6 +897,7 @@ html,body{height:100%;background:var(--bg);color:var(--ink);overflow:hidden;touc
   $('br-pocket').addEventListener('click',()=>{pocket(pg.classList.contains('hide'));if(!pg.classList.contains('hide'))$('br').classList.add('hide')});
   $('br-close').addEventListener('click',()=>$('br').classList.add('hide'));
   brConnect();
+  ['gesturestart','gesturechange'].forEach(k=>document.addEventListener(k,e=>e.preventDefault(),{passive:false}));
   /* ===== ALWAYS A WAY BACK TO THE LOCK SCREEN =====
      1) Leave the app 30s+ and come back = lock screen (like a real iPhone).
      2) Hold the top of the screen 2s anywhere (not on the lock screen) = lock screen.
